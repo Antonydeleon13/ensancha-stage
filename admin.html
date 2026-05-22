@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Control Admin • Ensancha 2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-black: #000000; 
+            --panel-bg: #090c14; 
+            --ensancha-yellow: #ffcc00;
+            --ensancha-green: #00cc66;
+            --ensancha-blue: #00a0ff;
+            --ensancha-pink: #ff66b2;
+            --ensancha-orange: #ff7b00;
+            --ensancha-cyan: #00ffcc;
+            --text-muted: #4e576f;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-black);
+            color: #ffffff;
+            margin: 0;
+            padding: 16px;
+            box-sizing: border-box;
+            min-height: 100vh;
+            letter-spacing: -0.2px;
+        }
+
+        body::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px;
+            background: linear-gradient(90deg, var(--ensancha-yellow), var(--ensancha-green), var(--ensancha-blue), var(--ensancha-pink), var(--ensancha-orange), var(--ensancha-cyan));
+            z-index: 100;
+        }
+
+        .main-header {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid #141923; padding-bottom: 10px; margin-bottom: 20px; margin-top: 5px;
+        }
+        .title-main { font-size: 22px; font-weight: 900; letter-spacing: 2px; margin: 0; }
+        .title-sub { font-size: 11px; font-weight: 700; letter-spacing: 5px; color: var(--ensancha-orange); text-transform: uppercase; margin-top: 2px; }
+        .badge-admin { background: var(--ensancha-pink); color: #000; padding: 5px 12px; border-radius: 4px; font-size: 10px; font-weight: 700; letter-spacing: 1px; }
+
+        .grid-admin { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        @media(min-width: 992px) { .grid-admin { grid-template-columns: 350px 1fr; } }
+
+        .panel {
+            background: var(--panel-bg); border: 1px solid #141923; border-radius: 12px; padding: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.9); height: fit-content;
+        }
+        .panel-title { font-size: 14px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; border-bottom: 1px solid #141923; padding-bottom: 8px; }
+
+        label { display: block; font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 6px; margin-top: 12px; }
+        input, select {
+            width: 100%; background: #04060a; border: 1px solid #141923; border-radius: 6px; padding: 10px;
+            color: #fff; font-family: inherit; font-size: 14px; box-sizing: border-box; transition: border 0.2s;
+        }
+        input:focus, select:focus { border-color: var(--ensancha-cyan); outline: none; }
+
+        .btn {
+            background: #ffffff; color: #000000; border: none; padding: 12px 20px; font-weight: 700;
+            border-radius: 6px; cursor: pointer; text-transform: uppercase; font-size: 12px; letter-spacing: 1px;
+            width: 100%; margin-top: 15px; transition: opacity 0.2s;
+        }
+        .btn:hover { opacity: 0.9; }
+        .btn-cyan { background: var(--ensancha-cyan); color: #000; }
+        .btn-add { background: rgba(255,255,255,0.05); color: #fff; border: 1px dashed #141923; padding: 8px; font-size: 11px; margin-top: 8px;}
+        
+        .dynamic-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
+        .btn-del { background: #ff4444; color: #fff; border: none; border-radius: 4px; padding: 10px; cursor: pointer; font-weight: bold;}
+
+        .main-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab-main-btn { background: #141923; color: var(--text-muted); border: none; padding: 10px 20px; font-weight: 700; border-radius: 6px; cursor: pointer; }
+        .tab-main-btn.active { background: var(--ensancha-blue); color: #000; }
+
+        .admin-tabs { display: flex; gap: 5px; margin-bottom: 15px; background: #04060a; padding: 4px; border-radius: 8px; }
+        .admin-tab-btn { flex: 1; background: transparent; border: none; color: var(--text-muted); padding: 8px; font-weight: 700; font-size: 12px; cursor: pointer; border-radius: 6px;}
+        .admin-tab-btn.active { background: #141923; color: #fff; }
+        
+        .hidden { display: none !important; }
+
+        /* --- COMPONENTES DE LA NUEVA LIBRERÍA --- */
+        .search-container { display: flex; gap: 10px; margin-bottom: 20px; align-items: center; }
+        .btn-trigger-modal { background: var(--ensancha-green); color: #000; font-size: 18px; width: 42px; height: 42px; border-radius: 6px; border: none; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; shrink: 0; }
+        
+        .catalog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 10px; }
+        .catalog-card { background: #04060a; border: 1px solid #141923; border-radius: 8px; padding: 16px; position: relative; }
+        .catalog-card-title { font-size: 15px; font-weight: 700; margin: 0 0 4px 0; color: #fff; }
+        .catalog-card-author { font-size: 11px; color: var(--ensancha-orange); text-transform: uppercase; font-weight: 700; margin-bottom: 10px; }
+        .catalog-card-meta { display: flex; gap: 12px; font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); }
+        .catalog-card-meta span strong { color: #fff; }
+        .catalog-badges { position: absolute; top: 16px; right: 16px; display: flex; gap: 6px; }
+        .badge-file { font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: bold; background: rgba(255,255,255,0.05); color: var(--text-muted); }
+        .badge-file.active-file { background: rgba(0, 255, 204, 0.15); color: var(--ensancha-cyan); }
+
+        /* MODAL FLOTANTE FORMULARIO */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
+        .modal-overlay.open { opacity: 1; pointer-events: auto; }
+        .modal-content { background: var(--panel-bg); border: 1px solid #141923; border-radius: 12px; width: 100%; max-width: 500px; padding: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.9); position: relative; }
+        .modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--text-muted); font-size: 18px; cursor: pointer; font-weight: bold; }
+        .modal-close:hover { color: #fff; }
+    </style>
+</head>
+<body>
+
+    <div class="main-header">
+        <div class="logo-area">
+            <h2 class="title-main">ENSANCHA 2026</h2>
+            <span class="title-sub">Consola de Administración</span>
+        </div>
+        <div class="badge-admin">LIVE CONTROL</div>
+    </div>
+
+    <div class="main-tabs">
+        <button class="tab-main-btn active" id="btn-tab-cronograma" onclick="switchMainTab('cronograma')">Cronograma General</button>
+        <button class="tab-main-btn" id="btn-tab-libreria" onclick="switchMainTab('libreria')">Librería de Canciones</button>
+    </div>
+
+    <div class="grid-admin" id="section-cronograma">
+        <div class="panel">
+            <div class="panel-title" style="color: var(--ensancha-orange)">Controles del Altar en Vivo</div>
+            <form id="form-live">
+                <label>Canción Actual</label>
+                <input type="text" id="live-title-inp" placeholder="Ej: Doble Porción" required>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div><label>Tono</label><input type="text" id="live-key-inp" required></div>
+                    <div><label>BPM</label><input type="number" id="live-bpm-inp" required></div>
+                </div>
+                <label>Secuencia</label>
+                <input type="text" id="live-seq-inp">
+                <label>Siguiente Canción</label>
+                <input type="text" id="live-next-inp">
+                <button type="submit" class="btn btn-cyan">Actualizar Altar Ahora</button>
+            </form>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title" style="color: var(--ensancha-blue)">Editar Canciones y Músicos por Bloque</div>
+            <div class="admin-tabs">
+                <button class="admin-tab-btn active" onclick="switchAdminBlock('jueves', 'am')">Jueves AM</button>
+                <button class="admin-tab-btn" onclick="switchAdminBlock('jueves', 'pm')">Jueves PM</button>
+                <button class="admin-tab-btn" onclick="switchAdminBlock('viernes', 'am')">Viernes AM</button>
+                <button class="admin-tab-btn" onclick="switchAdminBlock('viernes', 'pm')">Viernes PM</button>
+                <button class="admin-tab-btn" onclick="switchAdminBlock('sabado', 'am')">Sábado AM</button>
+                <button class="admin-tab-btn" onclick="switchAdminBlock('sabado', 'pm')">Sábado PM</button>
+            </div>
+            <h3 id="block-display-title" style="font-size: 16px; margin: 10px 0; color: var(--ensancha-yellow);">Editando: Jueves AM</h3>
+            <form id="form-cronograma">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                    <div>
+                        <h4 style="margin: 0; font-size: 12px; text-transform: uppercase; color: var(--text-muted);">Setlist</h4>
+                        <div id="songs-container" style="margin-top: 10px;"></div>
+                        <button type="button" class="btn btn-add" onclick="addSongRow()">+ Adjuntar desde Librería</button>
+                    </div>
+                    <div>
+                        <h4 style="margin: 0; font-size: 12px; text-transform: uppercase; color: var(--text-muted);">Músicos</h4>
+                        <div id="team-container" style="margin-top: 10px;"></div>
+                        <button type="button" class="btn btn-add" onclick="addTeamRow()">+ Agregar Integrante</button>
+                    </div>
+                </div>
+                <button type="button" class="btn" onclick="saveCronogramaBlock()">Guardar Bloque Seleccionado</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="panel hidden" id="section-libreria">
+        <div class="panel-title" style="color: var(--ensancha-green)">Catálogo de Canciones Globales</div>
+        
+        <div class="search-container">
+            <input type="text" id="lib-search-input" placeholder="Buscar canciones por título o autor..." oninput="filterCatalog()">
+            <button class="btn-trigger-modal" onclick="toggleModal(true)" title="Subir nueva canción">+</button>
+        </div>
+
+        <div class="catalog-grid" id="catalog-container">
+            </div>
+    </div>
+
+    <div class="modal-overlay" id="upload-modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="toggleModal(false)">✕</button>
+            <div class="panel-title" style="color: var(--ensancha-cyan); border: none; margin-bottom: 5px;">Nueva Canción de Catálogo</div>
+            <form id="form-upload-libreria">
+                <label>Título Oficial de la Canción</label>
+                <input type="text" id="lib-title" placeholder="Ej: Ruido de Oleada" required>
+                
+                <label>Autor / Ministerio</label>
+                <input type="text" id="lib-author" placeholder="Ej: Miel San Marcos, Elevate, Altar" required>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div><label>Tono Base</label><input type="text" id="lib-key" placeholder="Ej: F#" required></div>
+                    <div><label>BPM</label><input type="number" id="lib-bpm" placeholder="Ej: 74" required></div>
+                </div>
+
+                <label>Archivo MP3 (Audio / Track)</label>
+                <input type="file" id="lib-mp3" accept="audio/*">
+
+                <label>Cifrado / Letra (PDF)</label>
+                <input type="file" id="lib-pdf" accept="application/pdf">
+
+                <button type="submit" class="btn btn-cyan" id="btn-upload-lib" style="background: var(--ensancha-green); margin-top: 20px;">Subir y Registrar Canción</button>
+            </form>
+        </div>
+    </div>
+
+<script type="module">
+ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCrdNyJnjeeoqGUrCQYKNIOfTaZf59WkbE",
+        authDomain: "ensancha-gestion.firebaseapp.com",
+        projectId: "ensancha-gestion",
+        storageBucket: "ensancha-gestion.firebasestorage.app",
+        messagingSenderId: "692646472593",
+        appId: "1:692646472593:web:1022e5eef8f2c3a9fc4830"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    let cronogramaGlobal = {};
+    let cancionesCatalogo = [];
+    let currentDay = 'jueves', currentShift = 'am';
+
+    window.switchMainTab = function(tab) {
+        document.getElementById('btn-tab-cronograma').classList.toggle('active', tab === 'cronograma');
+        document.getElementById('btn-tab-libreria').classList.toggle('active', tab === 'libreria');
+        document.getElementById('section-cronograma').classList.toggle('hidden', tab !== 'cronograma');
+        document.getElementById('section-libreria').classList.toggle('hidden', tab !== 'libreria');
+    }
+
+    window.toggleModal = function(show) {
+        document.getElementById('upload-modal').classList.toggle('open', show);
+    }
+
+    // Registrar y Subir recurso
+    document.getElementById('form-upload-libreria').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('btn-upload-lib');
+        btn.innerText = "Subiendo archivos...";
+        btn.disabled = true;
+
+        const title = document.getElementById('lib-title').value;
+        const author = document.getElementById('lib-author').value;
+        const key = document.getElementById('lib-key').value;
+        const bpm = document.getElementById('lib-bpm').value;
+        const mp3File = document.getElementById('lib-mp3').files[0];
+        const pdfFile = document.getElementById('lib-pdf').files[0];
+
+        let audioUrl = "", pdfUrl = "";
+
+        try {
+            if (mp3File) {
+                const audioRef = ref(storage, `canciones/${Date.now()}_${mp3File.name}`);
+                await uploadBytes(audioRef, mp3File);
+                audioUrl = await getDownloadURL(audioRef);
+            }
+            if (pdfFile) {
+                const pdfRef = ref(storage, `pdfs/${Date.now()}_${pdfFile.name}`);
+                await uploadBytes(pdfRef, pdfFile);
+                pdfUrl = await getDownloadURL(pdfRef);
+            }
+
+            // Creamos el objeto con los datos básicos
+            const songData = { title, author, key, bpm };
+            
+            if (editingSongId) {
+                // MODO EDICIÓN: Si se subieron archivos nuevos, los actualizamos. Si no, se quedan los anteriores.
+                if (audioUrl) songData.audioUrl = audioUrl;
+                if (pdfUrl) songData.pdfUrl = pdfUrl;
+
+                await updateDoc(doc(db, "libreria_canciones", editingSongId), songData);
+                alert("¡Canción actualizada con éxito!");
+            } else {
+                // MODO CREACIÓN: Guardamos todo, incluyendo las URLs (vayan vacías o llenas)
+                songData.audioUrl = audioUrl;
+                songData.pdfUrl = pdfUrl;
+
+                await addDoc(collection(db, "libreria_canciones"), songData);
+                alert("¡Canción añadida con éxito al catálogo!");
+            }
+
+            // Limpieza y cierre común para ambos modos
+            document.getElementById('form-upload-libreria').reset();
+            toggleModal(false);
+            await loadCatalogo();
+            renderFormBlock();
+        } catch (err) {
+            console.error(err);
+            alert("Error al procesar la canción.");
+        } finally {
+            btn.innerText = "Subir y Registrar Canción";
+            btn.disabled = false;
+        }
+    });
+
+    async function loadCatalogo() {
+        const snap = await getDocs(collection(db, "libreria_canciones"));
+        cancionesCatalogo = [];
+        snap.forEach(doc => cancionesCatalogo.push({ id: doc.id, ...doc.data() }));
+        renderCatalogDOM(cancionesCatalogo);
+    }
+
+    function renderCatalogDOM(list) {
+        const container = document.getElementById('catalog-container');
+        if(list.length === 0) {
+            container.innerHTML = `<div style="grid-column: 1/-1; color: var(--text-muted); font-size:13px; text-align:center; padding: 20px;">No se encontraron canciones en la librería.</div>`;
+            return;
+        }
+       container.innerHTML = list.map(c => `
+    <div class="catalog-card">
+        <div class="catalog-badges">
+            <div class="badge-file ${c.audioUrl ? 'active-file' : ''}">MP3</div>
+            <div class="badge-file ${c.pdfUrl ? 'active-file' : ''}">PDF</div>
+        </div>
+        <h4 class="catalog-card-title">${c.title}</h4>
+        <div class="catalog-card-author">${c.author || 'Autor no especificado'}</div>
+        <div class="catalog-card-meta">
+            <span>TONO: <strong>${c.key}</strong></span>
+            <span>BPM: <strong>${c.bpm}</strong></span>
+        </div>
+        <button onclick="editSongCatalog('${c.id}')" style="position: absolute; bottom: 12px; right: 12px; background: none; border: none; cursor: pointer; font-size: 14px;" title="Editar">✏️</button>
+    </div>
+`).join('');
+    }
+
+    window.filterCatalog = function() {
+        const query = document.getElementById('lib-search-input').value.toLowerCase();
+        const filtered = cancionesCatalogo.filter(c => 
+            c.title.toLowerCase().includes(query) || 
+            (c.author && c.author.toLowerCase().includes(query))
+        );
+        renderCatalogDOM(filtered);
+    }
+
+    async function loadCronogramaInicial() {
+        await loadCatalogo();
+        const docSnap = await getDoc(doc(db, "cronograma", "eventos"));
+        if (docSnap.exists()) cronogramaGlobal = docSnap.data();
+        renderFormBlock();
+    }
+
+    window.renderFormBlock = function() {
+        document.getElementById('block-display-title').innerText = `Editando: ${currentDay.toUpperCase()} ${currentShift.toUpperCase()}`;
+        const sCont = document.getElementById('songs-container'); sCont.innerHTML = '';
+        const currentSongs = cronogramaGlobal[currentDay]?.[currentShift]?.canciones || [];
+        currentSongs.forEach(song => addSongRow(song.id, song.tono, song.bpm));
+
+        const tCont = document.getElementById('team-container'); tCont.innerHTML = '';
+        const currentTeam = cronogramaGlobal[currentDay]?.[currentShift]?.musicos || [];
+        currentTeam.forEach(m => addTeamRow(m.rol, m.nombre));
+    }
+
+    window.addSongRow = function(selectedId = '', tono = '', bpm = '') {
+        const div = document.createElement('div');
+        div.className = 'dynamic-row song-item';
+        let options = cancionesCatalogo.map(c => `<option value="${c.id}" ${c.id === selectedId ? 'selected' : ''}>${c.title}</option>`).join('');
+        div.innerHTML = `
+            <select style="flex:2;" onchange="updateSongMeta(this)">
+                <option value="">-- Selecciona --</option>${options}
+            </select>
+            <input type="text" placeholder="Tono" value="${tono}" style="flex:0.5; text-align:center;">
+            <input type="number" placeholder="BPM" value="${bpm}" style="flex:0.6; text-align:center;">
+            <button type="button" class="btn-del" onclick="this.parentElement.remove()">×</button>
+        `;
+        document.getElementById('songs-container').appendChild(div);
+    }
+
+    window.updateSongMeta = function(selectEl) {
+        const song = cancionesCatalogo.find(c => c.id === selectEl.value);
+        if (song) {
+            const row = selectEl.parentElement;
+            row.querySelectorAll('input')[0].value = song.key;
+            row.querySelectorAll('input')[1].value = song.bpm;
+        }
+    }
+
+    window.saveCronogramaBlock = async function() {
+        const canciones = [];
+        document.querySelectorAll('.song-item').forEach(row => {
+    const sel = row.querySelector('select');
+    const ins = row.querySelectorAll('input');
+    if(sel.value) {
+        const target = cancionesCatalogo.find(c => c.id === sel.value);
+        canciones.push({ 
+            id: sel.value, 
+            titulo: target.title, 
+            author: target.author || '', // <-- ESTA LÍNEA ES LA MAGIA: Guarda el autor en el setlist del día
+            tono: ins[0].value, 
+            bpm: ins[1].value, 
+            audioUrl: target.audioUrl || '', 
+            pdfUrl: target.pdfUrl || '' 
+        });
+    }
+});
+
+        const musicos = [];
+        document.querySelectorAll('.team-item').forEach(row => {
+            const ins = row.querySelectorAll('input');
+            if(ins[0].value) musicos.push({ rol: ins[0].value, nombre: ins[1].value });
+        });
+
+        if(!cronogramaGlobal[currentDay]) cronogramaGlobal[currentDay] = {};
+        cronogramaGlobal[currentDay][currentShift] = { canciones, musicos };
+        await setDoc(doc(db, "cronograma", "eventos"), cronogramaGlobal);
+        alert("¡Sincronizado con éxito!");
+    }
+
+    window.switchAdminBlock = function(day, shift) {
+        document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
+        currentDay = day; currentShift = shift;
+        renderFormBlock();
+    }
+
+    document.getElementById('form-live').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await setDoc(doc(db, "tablero_alabanza", "ensancha_actual"), {
+            cancionActual: {
+                titulo: document.getElementById('live-title-inp').value,
+                tono: document.getElementById('live-key-inp').value,
+                tempo: document.getElementById('live-bpm-inp').value,
+                secuencia: document.getElementById('live-seq-inp').value || 'Estructura libre'
+            },
+            siguienteCancion: document.getElementById('live-next-inp').value || 'Final del servicio'
+        });
+        alert("¡Altar actualizado!");
+    });
+
+    // NUEVO: Variable global para rastrear si estamos editando
+let editingSongId = null;
+
+window.editSongCatalog = function(id) {
+    const song = cancionesCatalogo.find(c => c.id === id);
+    if (!song) return;
+
+    // Cambiar comportamiento del modal a Edición
+    editingSongId = id;
+    document.querySelector('#upload-modal .panel-title').innerText = "Editar Canción de Catálogo";
+    document.getElementById('btn-upload-lib').innerText = "Guardar Cambios";
+
+    // Rellenar los campos con la info actual
+    document.getElementById('lib-title').value = song.title;
+    document.getElementById('lib-author').value = song.author || '';
+    document.getElementById('lib-key').value = song.key;
+    document.getElementById('lib-bpm').value = song.bpm;
+
+    // Abrir el modal
+    toggleModal(true);
+}
+
+// NUEVO: Resetear el estado de la variable al cerrar el modal manualmente
+const originalToggleModal = window.toggleModal;
+window.toggleModal = function(show) {
+    if(!show) {
+        editingSongId = null;
+        document.getElementById('form-upload-libreria').reset();
+        document.querySelector('#upload-modal .panel-title').innerText = "Nueva Canción de Catálogo";
+        document.getElementById('btn-upload-lib').innerText = "Subir y Registrar Canción";
+    }
+    originalToggleModal(show);
+}
+
+
+
+    loadCronogramaInicial();
+</script>
+<script>
+    function addTeamRow(rol='', nombre='') {
+        const div = document.createElement('div'); div.className = 'dynamic-row team-item';
+        div.innerHTML = `
+            <input type="text" placeholder="Rol" value="${rol}" style="flex: 1;">
+            <input type="text" placeholder="Nombre" value="${nombre}" style="flex: 1.5;">
+            <button type="button" class="btn-del" onclick="this.parentElement.remove()">×</button>
+        `;
+        document.getElementById('team-container').appendChild(div);
+    }
+</script>
+</body>
+</html>
