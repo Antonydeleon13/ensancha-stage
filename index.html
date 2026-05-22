@@ -19,6 +19,10 @@
         --ensancha-orange: #ff7b00;
         --ensancha-cyan: #00ffcc;
         
+        /* Nuevos colores específicos basados en los flyers por día */
+        --ensancha-red-vie: #ff3b00;  /* Rojo brillante del Viernes */
+        --ensancha-cyan-sab: #00e5ff; /* Azul celeste del Sábado */
+        
         --text-muted: #4e576f;
     }
 
@@ -118,9 +122,11 @@
         transition: all 0.2s ease;
         position: relative;
     }
+    
+    /* MODIFICADO: Colores activos asignados basados en tus imágenes por día */
     .tab-button.active[data-day="jueves"] { color: var(--ensancha-yellow); }
-    .tab-button.active[data-day="viernes"] { color: var(--ensancha-blue); }
-    .tab-button.active[data-day="sabado"] { color: var(--ensancha-orange); }
+    .tab-button.active[data-day="viernes"] { color: var(--ensancha-red-vie); }
+    .tab-button.active[data-day="sabado"] { color: var(--ensancha-cyan-sab); }
     
     .tab-button::after {
         content: '';
@@ -130,8 +136,8 @@
         transition: all 0.2s ease;
     }
     .tab-button.active[data-day="jueves"]::after { background: var(--ensancha-yellow); }
-    .tab-button.active[data-day="viernes"]::after { background: var(--ensancha-blue); }
-    .tab-button.active[data-day="sabado"]::after { background: var(--ensancha-orange); }
+    .tab-button.active[data-day="viernes"]::after { background: var(--ensancha-red-vie); }
+    .tab-button.active[data-day="sabado"]::after { background: var(--ensancha-cyan-sab); }
 
     /* SECCIÓN CRONOGRAMA CONTAINER */
     .grid-cronograma {
@@ -178,7 +184,7 @@
         background-color: transparent;
         perspective: 1000px;
         height: auto; 
-        margin-bottom: 0; /* Quitamos márgenes forzados */
+        margin-bottom: 0; 
     }
 
     .service-card-inner {
@@ -230,13 +236,15 @@
         visibility: visible; 
     }
 
-    /* Bordes de color según bloque/luces del logo */
-    .jueves-am { border-left: 4px solid var(--ensancha-yellow); }
-    .jueves-pm { border-left: 4px solid var(--ensancha-green); }
-    .viernes-am { border-left: 4px solid var(--ensancha-blue); }
-    .viernes-pm { border-left: 4px solid var(--ensancha-pink); }
-    .sabado-am { border-left: 4px solid var(--ensancha-orange); }
-    .sabado-pm { border-left: 4px solid var(--ensancha-cyan); }
+    /* MODIFICADO: Bordes unificados por día usando las paletas correctas */
+    .jueves-am, .jueves-pm { border-left: 4px solid var(--ensancha-yellow); }
+    .viernes-am, .viernes-pm { border-left: 4px solid var(--ensancha-red-vie); }
+    .sabado-am, .sabado-pm { border-left: 4px solid var(--ensancha-cyan-sab); }
+
+    /* Títulos de las columnas superiores en PC unificados */
+    #col-jueves .column-title { color: var(--ensancha-yellow); }
+    #col-viernes .column-title { color: var(--ensancha-red-vie); }
+    #col-sabado .column-title { color: var(--ensancha-cyan-sab); }
 
     .card-header {
         display: flex;
