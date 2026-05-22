@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ensancha 2026 • Doble Porción Stage</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+    <style>
+    :root {
+        --bg-black: #000000; 
+        --panel-bg: #090c14; 
+        --panel-bg-back: #080514;
+        
+        /* Colores oficiales de los haces de luz */
+        --ensancha-yellow: #ffcc00;
+        --ensancha-green: #00cc66;
+        --ensancha-blue: #00a0ff;
+        --ensancha-pink: #ff66b2;
+        --ensancha-orange: #ff7b00;
+        --ensancha-cyan: #00ffcc;
+        
+        /* Color extraído de la imagen del Viernes */
+        --ensancha-red-vie: #ff3b00;
+        
+        --text-muted: #4e576f;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--bg-black);
+        color: #ffffff;
+        margin: 0;
+        padding: 16px;
+        box-sizing: border-box;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        overflow-y: auto; 
+        overflow-x: hidden;
+        letter-spacing: -0.2px;
+        padding-bottom: 120px; /* Espacio extra para que el reproductor no tape las últimas canciones */
+    }
+
+    /* SISTEMA COMPACTO: Eliminamos el scroll interno para que la tabla respire libremente */
+    .table-container { 
+        flex: 1; 
+        overflow: visible !important; 
+        max-height: none !important; 
+    }
+
+    /* Estructura limpia de la Tabla */
+    table { 
+        width: 100%; 
+        border-collapse: collapse;
+        display: table;
+    }
+    th { font-size: 9px; text-transform: uppercase; color: var(--text-muted); padding: 4px 6px; text-align: left; border-bottom: 1px solid #141923; font-weight: 700; }
+    td { padding: 8px 6px; font-size: 13px; font-weight: 600; border-bottom: 1px solid #06080d; }
+    .td-tono { font-family: 'JetBrains Mono', monospace; color: var(--ensancha-cyan); font-weight: 800; text-align: center; font-size: 12px;}
+    .td-bpm { font-family: 'JetBrains Mono', monospace; color: var(--text-muted); text-align: center; font-size: 12px;}
+
+    /* Header Oficial */
+    .main-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #141923;
+        padding-bottom: 10px;
+        margin-top: 5px;
+    }
+    .logo-area { display: flex; flex-direction: column; }
+    .title-main { font-size: 22px; font-weight: 900; letter-spacing: 2px; color: #ffffff; margin: 0; }
+    .title-sub { font-size: 11px; font-weight: 700; letter-spacing: 5px; color: var(--ensancha-orange); text-transform: uppercase; margin-top: 2px; }
+    .badge-live { background: #ffffff; color: #000000; padding: 5px 12px; border-radius: 4px; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+
+    /* PANEL TRANSMISIÓN EN VIVO DESDE FIREBASE */
+    .live-banner {
+        background: var(--panel-bg);
+        border: 1px solid #141923;
+        border-left: 5px solid var(--ensancha-cyan);
+        border-radius: 12px;
+        padding: 16px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.9);
+    }
+    @media (min-width: 768px) {
+        .live-banner { flex-direction: row; justify-content: space-between; align-items: center; padding: 20px 30px; }
+    }
+    .live-info h1 { font-size: clamp(22px, 3vw, 40px); margin: 0 0 6px 0; font-weight: 900; letter-spacing: -0.5px; line-height: 1.2; }
+    .live-meta { display: flex; flex-wrap: wrap; gap: 15px; font-size: 14px; font-weight: 700; }
+    .live-meta .tono { color: var(--ensancha-cyan); font-family: 'JetBrains Mono', monospace; font-size: 16px; }
+    .live-meta .bpm { color: var(--ensancha-yellow); font-family: 'JetBrains Mono', monospace; font-size: 16px; }
+    .live-right { border-top: 1px solid #141923; padding-top: 10px; }
+    @media (min-width: 768px) { .live-right { text-align: right; max-width: 45%; border-top: none; padding-top: 0; } }
+    .next-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 1px;}
+    .next-song-text { font-size: 18px; font-weight: 700; color: #cbd5e1; margin-top: 2px;}
+
+    /* --- SISTEMA DE PESTAÑAS INTERACTIVAS (TABS) --- */
+    .tabs-container {
+        display: flex;
+        justify-content: space-between;
+        border-bottom: 2px solid #141923;
+        padding-bottom: 2px;
+        margin-top: 10px;
+    }
+    .tab-button {
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        font-size: 14px;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        padding: 12px 10px;
+        cursor: pointer;
+        flex: 1;
+        text-align: center;
+        transition: all 0.2s ease;
+        position: relative;
+    }
+    .tab-button.active[data-day="viernes"] { color: var(--ensancha-red-vie); }
+    
+    .tab-button::after {
+        content: '';
+        position: absolute;
+        bottom: -2px; left: 0; width: 100%; height: 3px;
+        background: transparent;
+        transition: all 0.2s ease;
+    }
+    .tab-button.active[data-day="viernes"]::after { background: var(--ensancha-red-vie); }
+
+    /* SECCIÓN CRONOGRAMA CONTAINER */
+    .grid-cronograma {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+    @media (min-width: 992px) {
+        .grid-cronograma { display: grid; grid-template-columns: 1fr; gap: 24px; align-items: start; }
+        .tabs-container { display: none; } 
+        .day-column { display: flex !important; } 
+    }
+
+    /* Control de visibilidad de los días en móvil */
+    .day-column {
+        display: none; 
+        flex-direction: column;
+        gap: 16px;
+        animation: fadeIn 0.3s ease-in-out;
+        height: auto !important;
+        overflow: visible !important;
+    }
+    .day-column.active-day {
+        display: flex;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(4px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .column-title {
+        font-size: 15px;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        padding: 4px 0;
+        display: none; 
+    }
+    @media (min-width: 992px) { .column-title { display: block; text-align: center; border-bottom: 2px solid #141923; } }
+
+    /* Altura dinámica adaptada a la cantidad de canciones */
+    .service-card {
+        background-color: transparent;
+        perspective: 1000px;
+        min-height: 200px;
+        height: auto; 
+        margin-bottom: 0; 
+    }
+
+    .service-card-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        transform-style: preserve-3d;
+    }
+
+    .service-card.flipped .service-card-inner { transform: rotateY(180deg); }
+
+    .card-front, .card-back {
+        width: 100%;
+        min-height: 200px;
+        height: auto;
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+        border-radius: 10px;
+        padding: 16px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        background: var(--panel-bg);
+        border: 1px solid #141923;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+    }
+
+    /* LÓGICA DE COLAPSO: Remueve espacios vacíos al voltear */
+    .card-front { 
+        position: relative; 
+    }
+    .service-card.flipped .card-front { 
+        position: absolute; 
+        top: 0; left: 0; 
+        opacity: 0; 
+        visibility: hidden; 
+    }
+
+    .card-back { 
+        background: #090614; 
+        border-left: 4px solid var(--ensancha-cyan); 
+        transform: rotateY(180deg); 
+        position: absolute; 
+        top: 0; left: 0; 
+        visibility: hidden; 
+    }
+    .service-card.flipped .card-back { 
+        position: relative; 
+        visibility: visible; 
+    }
+
+    /* MODIFICADO: Ambos servicios del Viernes heredan el color Rojo/Anaranjado de la imagen */
+    .viernes-am { border-left: 4px solid var(--ensancha-red-vie); }
+    .viernes-pm { border-left: 4px solid var(--ensancha-red-vie); }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #141923;
+        padding-bottom: 6px;
+        margin-bottom: 10px;
+    }
+    .service-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #ffffff; }
+    .hint-team { font-size: 9px; color: #ffffff; background: rgba(255,255,255,0.06); padding: 3px 8px; border-radius: 4px; font-weight: 600; text-transform: uppercase; }
+
+    /* LISTA DE MÚSICOS */
+    .team-list { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+    .team-member { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.01); padding: 6px 12px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.02); }
+    .role { font-size: 9px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; }
+    .name { font-size: 12px; font-weight: 700; color: #ffffff; }
+
+    /* MULTIMEDIA INTERNA */
+    .media-player-bar {
+        position: fixed; bottom: 0; left: 0; right: 0; background: #0c0f1a; border-top: 2px solid var(--ensancha-green);
+        padding: 12px 24px; display: none; justify-content: space-between; align-items: center; z-index: 2000;
+        box-shadow: 0 -10px 30px rgba(0,0,0,0.8);
+    }
+    .player-info { font-size: 13px; font-weight: 700; color: #fff; }
+    .player-info span { font-size: 10px; color: var(--text-muted); display: block; text-transform: uppercase; }
+
+    /* Lector PDF */
+    .pdf-modal {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85);
+        z-index: 3000; display: none; flex-direction: column; justify-content: center; align-items: center;
+    }
+    .pdf-container { width: 90%; max-width: 900px; height: 85vh; background: #111; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
+    .pdf-header { background: #141923; padding: 12px; display: flex; justify-content: space-between; align-items: center; color: #fff; }
+    .btn-close-pdf { background: #ff4444; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+
+    .clickable-song { 
+        cursor: pointer; 
+        transition: background 0.2s; 
+    }
+    .clickable-song:hover { background: rgba(0, 204, 102, 0.1); }
+</style>
+</head>
+<body>
+
+    <div class="main-header">
+        <div class="logo-area">
+            <h2 class="title-main">ENSANCHA</h2>
+            <span class="title-sub">Doble Porción</span>
+        </div>
+        <div class="badge-live">LIVE SYNC</div>
+    </div>
+
+    <div class="tabs-container" id="tabsMenu">
+        <button class="tab-button active" data-day="viernes" onclick="switchTab('viernes')">Viernes 5</button>
+    </div>
+
+    <div class="grid-cronograma">
+
+        <div class="day-column active-day" id="col-viernes">
+            <div class="column-title" style="color: var(--ensancha-red-vie);">Viernes 5</div>
+            
+            <div class="service-card"> 
+                <div class="service-card-inner">
+                    <div class="card-front viernes-am">
+                        <div class="card-header">
+                            <span class="service-title">SERVICIO • AM</span>
+                            <span class="hint-team" onclick="toggleFlip(this.closest('.service-card'))" style="cursor: pointer;">Músicos ↻</span>
+                        </div>
+                        <div class="table-container">
+                            <table>
+                                <thead><tr><th>Canción</th><th style="text-align:center">Tono</th><th style="text-align:center">BPM</th></tr></thead>
+                                <tbody id="songs-viernes-am"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-back">
+                        <div class="card-header">
+                            <span class="service-title" style="color:var(--ensancha-cyan)">Equipo • Viernes AM</span>
+                            <span class="hint-team" onclick="toggleFlip(this.closest('.service-card'))" style="cursor: pointer;">Lista ↻</span>
+                        </div>
+                        <div class="team-list" id="team-viernes-am"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="service-card"> 
+                <div class="service-card-inner">
+                    <div class="card-front viernes-pm">
+                        <div class="card-header">
+                            <span class="service-title">SERVICIO • PM</span>
+                            <span class="hint-team" onclick="toggleFlip(this.closest('.service-card'))" style="cursor: pointer;">Músicos ↻</span>
+                        </div>
+                        <div class="table-container">
+                            <table>
+                                <thead><tr><th>Canción</th><th style="text-align:center">Tono</th><th style="text-align:center">BPM</th></tr></thead>
+                                <tbody id="songs-viernes-pm"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-back">
+                        <div class="card-header">
+                            <span class="service-title" style="color:var(--ensancha-cyan)">Equipo • Viernes PM</span>
+                            <span class="hint-team" onclick="toggleFlip(this.closest('.service-card'))" style="cursor: pointer;">Lista ↻</span>
+                        </div>
+                        <div class="team-list" id="team-viernes-pm"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCrdNyJnjeeoqGUrCQYKNIOfTaZf59WkbE",
+        authDomain: "ensancha-gestion.firebaseapp.com",
+        projectId: "ensancha-gestion",
+        storageBucket: "ensancha-gestion.firebasestorage.app",
+        messagingSenderId: "692646472593",
+        appId: "1:692646472593:web:1022e5eef8f2c3a9fc4830"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // 1. Escuchar el Banner superior ("En Altar Ahora") en vivo
+    onSnapshot(doc(db, "tablero_alabanza", "ensancha_actual"), (doc) => {
+        if (doc.exists()) {
+            const data = doc.data();
+            document.getElementById('live-title').innerText = data.cancionActual?.titulo || 'Setlist libre';
+            document.getElementById('live-key').innerText = data.cancionActual?.tono || '--';
+            document.getElementById('live-bpm').innerText = data.cancionActual?.tempo || '--';
+            document.getElementById('live-seq').innerText = data.cancionActual?.secuencia || 'Estructura libre';
+            document.getElementById('live-next').innerText = data.siguienteCancion || 'Final del servicio';
+        }
+    });
+
+    // 2. Escuchar las Tablas de canciones y Músicos del día Viernes en vivo
+    onSnapshot(doc(db, "cronograma", "eventos"), (snapshot) => {
+        if (snapshot.exists()) {
+            const data = snapshot.data();
+            
+            const bloques = [
+                { day: 'viernes', shift: 'am' },
+                { day: 'viernes', shift: 'pm' }
+            ];
+
+            bloques.forEach(({ day, shift }) => {
+                const bloqueData = data[day]?.[shift];
+                
+                const tableBody = document.getElementById(`songs-${day}-${shift}`);
+                const teamContainer = document.getElementById(`team-${day}-${shift}`);
+
+                // Sincronizar Canciones
+                if (tableBody) {
+                    if (bloqueData && bloqueData.canciones && bloqueData.canciones.length > 0) {
+                        tableBody.innerHTML = bloqueData.canciones.map((c, idx) => {
+                            return `
+                               <tr class="clickable-song" onclick="openMedia('${c.titulo}', '${c.audioUrl}', '${c.pdfUrl}', '${c.author || c.autor || ''}')">
+                                    <td>
+                                        <div style="font-weight: 700;">${idx + 1}. ${c.titulo} ${c.pdfUrl ? '📄' : ''} ${c.audioUrl ? '🎵' : ''}</div>
+                                        <div style="font-size: 11px; color: var(--ensancha-orange); text-transform: uppercase; margin-top: 2px; font-weight: 600;">
+                                            ${c.author || c.autor || 'Autor no especificado'}
+                                        </div>
+                                    </td>
+                                    <td class="td-tono">${c.tono}</td>
+                                    <td class="td-bpm">${c.bpm}</td>
+                                </tr>
+                            `;
+                        }).join('');
+                    } else {
+                        tableBody.innerHTML = `<tr><td colspan="3" style="color:var(--text-muted); font-style:italic;">No hay canciones asignadas</td></tr>`;
+                    }
+                }
+
+                // Sincronizar Músicos
+                if (teamContainer) {
+                    if (bloqueData && bloqueData.musicos && bloqueData.musicos.length > 0) {
+                        teamContainer.innerHTML = bloqueData.musicos.map(m => `
+                            <div class="team-member">
+                                <span class="role">${m.rol}</span>
+                                <span class="name">${m.nombre}</span>
+                            </div>
+                        `).join('');
+                    } else {
+                        teamContainer.innerHTML = `<span style="color:var(--text-muted); font-size:11px; font-style:italic;">No hay integrantes agregados</span>`;
+                    }
+                }
+            });
+        }
+    });
+</script>
+
+<script>
+    // Lógica para alternar la vuelta 3D de las tarjetas
+    function toggleFlip(cardElement) {
+        cardElement.classList.toggle('flipped');
+    }
+
+    // Lógica inteligente para cambiar entre las pestañas del día en celulares
+    function switchTab(day) {
+        const buttons = document.querySelectorAll('.tab-button');
+        buttons.forEach(btn => btn.classList.remove('active'));
+
+        const activeBtn = document.querySelector(`.tab-button[data-day="${day}"]`);
+        if (activeBtn) activeBtn.classList.add('active');
+
+        const columns = document.querySelectorAll('.day-column');
+        columns.forEach(col => col.classList.remove('active-day'));
+
+        const targetColumn = document.getElementById(`col-${day}`);
+        if (targetColumn) targetColumn.classList.add('active-day');
+    }
+
+    window.openMedia = function(titulo, audioUrl, pdfUrl) {
+        if (audioUrl && audioUrl !== "undefined" && audioUrl !== "") {
+            document.getElementById('player-track-title').innerText = titulo;
+            document.getElementById('player-track-subtitle').innerText = "Reproduciendo Track"; 
+            
+            const player = document.getElementById('global-audio-element');
+            player.src = audioUrl;
+            document.getElementById('global-player-bar').style.display = 'flex';
+            player.play();
+        }
+
+        if (pdfUrl && pdfUrl !== "undefined" && pdfUrl !== "") {
+            document.getElementById('pdf-modal-title').innerText = `Cifrado Oficial • ${titulo}`;
+            document.getElementById('pdf-iframe').src = pdfUrl;
+            document.getElementById('global-pdf-modal').style.display = 'flex';
+        }
+        
+        if(!audioUrl && !pdfUrl) {
+            alert(`"${titulo}" no tiene archivos multimedia cargados en la librería.`);
+        }
+    }
+</script>
+
+<div class="media-player-bar" id="global-player-bar">
+    <div class="player-info">
+        <span id="player-track-subtitle">Reproduciendo Track</span>
+        <div id="player-track-title">Nombre de la canción</div>
+    </div>
+    <audio id="global-audio-element" controls style="accent-color: var(--ensancha-green);"></audio>
+    <button class="btn-close-pdf" onclick="document.getElementById('global-player-bar').style.display='none'; document.getElementById('global-audio-element').pause();" style="background:#222;">✕ Cerrar</button>
+</div>
+
+<div class="pdf-modal" id="global-pdf-modal">
+    <div class="pdf-container">
+        <div class="pdf-header">
+            <span id="pdf-modal-title" style="font-weight: 700;">Visor de Cifrado</span>
+            <button class="btn-close-pdf" onclick="document.getElementById('global-pdf-modal').style.display='none'">✕ Cerrar Lector</button>
+        </div>
+        <iframe id="pdf-iframe" src="" style="width:100%; height:100%; border:none;"></iframe>
+    </div>
+</div>
+
+</body>
+</html>
