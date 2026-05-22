@@ -45,7 +45,10 @@ body {
 .table-container { 
     flex: 1; 
     overflow-y: auto; 
-    max-height: 170px; /* Limita la altura interna para que la tarjeta no se deforme */
+    max-height: 170px; 
+    
+    /* AGREGA ESTA LÍNEA ESPECÍFICA */
+    -webkit-overflow-scrolling: touch; 
 }
 
 /* Custom Scrollbar sutil para las tablas de canciones (opcional, se ve limpio) */
@@ -159,11 +162,15 @@ body {
 
         /* Control de visibilidad de los días en móvil */
         .day-column {
-            display: none; /* Se controla con JS en móvil */
-            flex-direction: column;
-            gap: 16px;
-            animation: fadeIn 0.3s ease-in-out;
-        }
+    display: none; 
+    flex-direction: column;
+    gap: 16px;
+    animation: fadeIn 0.3s ease-in-out;
+    
+    /* AGREGA ESTAS DOS LÍNEAS */
+    height: auto !important;
+    overflow: visible !important;
+}
         .day-column.active-day {
             display: flex;
         }
@@ -272,7 +279,13 @@ body {
 .btn-close-pdf { background: #ff4444; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
 
 /* Hacer las filas de canciones cliqueables */
-.clickable-song { cursor: pointer; transition: background 0.2s; }
+.clickable-song { 
+    cursor: pointer; 
+    transition: background 0.2s; 
+    
+    /* AGREGA ESTA LÍNEA: Permite deslizar la pantalla (pan-y) pero mantiene el toque (click) */
+    touch-action: pan-y; 
+}
 .clickable-song:hover { background: rgba(0, 204, 102, 0.1); }
 
 
@@ -315,36 +328,31 @@ body {
         <div class="day-column active-day" id="col-jueves">
             <div class="column-title" style="color: var(--ensancha-yellow);">Jueves 4</div>
             
-            <div class="service-card"> <div class="service-card-inner">
-        
-        <div class="card-front jueves-am">
-            <div class="card-header">
-                <span class="service-title">SERVICIO • AM</span>
-                <span class="hint-team" onclick="toggleFlip(this.closest('.service-card'))" style="cursor: pointer;">Músicos ↻</span>
-            </div>
-            <div class="table-container">
-                <table>
-                    <thead><tr><th>Canción</th><th style="text-align:center">Tono</th><th style="text-align:center">BPM</th></tr></thead>
-                    <tbody id="songs-jueves-am">
-                        </tbody>
-                </table>
-            </div>
-        </div>
-        
-        <div class="card-back">
-            <div class="card-header">
-                <span class="service-title" style="color:var(--ensancha-cyan)">Equipo • Jueves AM</span>
-                <span class="hint-team" onclick="toggleFlip(this.closest('.service-card'))" style="cursor: pointer;">Lista ↻</span>
-            </div>
-            <div class="team-list" id="team-jueves-am">
-                </div>
-        </div>
-
-    </div>
-</div>
-
-            <div class="service-card">
+            <div class="service-card"> 
                 <div class="service-card-inner">
+                    <div class="card-front jueves-am">
+                        <div class="card-header">
+                            <span class="service-title">SERVICIO • AM</span>
+                            <span class="hint-team" onclick="toggleFlip(this.closest('.service-card'))" style="cursor: pointer;">Músicos ↻</span>
+                        </div>
+                        <div class="table-container">
+                            <table>
+                                <thead><tr><th>Canción</th><th style="text-align:center">Tono</th><th style="text-align:center">BPM</th></tr></thead>
+                                <tbody id="songs-jueves-am"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-back">
+                        <div class="card-header">
+                            <span class="service-title" style="color:var(--ensancha-cyan)">Equipo • Jueves AM</span>
+                            <span class="hint-team" onclick="toggleFlip(this.closest('.service-card'))" style="cursor: pointer;">Lista ↻</span>
+                        </div>
+                        <div class="team-list" id="team-jueves-am"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="service-card"> <div class="service-card-inner">
                     <div class="card-front jueves-pm">
                         <div class="card-header">
                             <span class="service-title">SERVICIO • PM</span>
@@ -353,10 +361,7 @@ body {
                         <div class="table-container">
                             <table>
                                 <thead><tr><th>Canción</th><th style="text-align:center">Tono</th><th style="text-align:center">BPM</th></tr></thead>
-                                <tbody id="songs-jueves-pm"> <tr><td>1. Hermoso Nombre</td><td class="td-tono">G</td><td class="td-bpm">68</td></tr>
-                                    <tr><td>2. A Danzar</td><td class="td-tono">Am</td><td class="td-bpm">130</td></tr>
-                                    <tr><td>3. Solo a Ti sea la Gloria</td><td class="td-tono">D</td><td class="td-bpm">72</td></tr>
-                                </tbody>
+                                <tbody id="songs-jueves-pm"></tbody>
                             </table>
                         </div>
                     </div>
@@ -365,11 +370,7 @@ body {
                             <span class="service-title" style="color:var(--ensancha-cyan)">Equipo • Jueves PM</span>
                             <span class="hint-team" onclick="toggleFlip(this.closest('.service-card'))" style="cursor: pointer;">Lista ↻</span>
                         </div>
-                        <div class="team-list" id="team-jueves-pm"> <div class="team-member"><span class="role">Líder</span><span class="name">Gaby de Alvarado</span></div>
-                            <div class="team-member"><span class="role">Piano</span><span class="name">Marcos Vinicio</span></div>
-                            <div class="team-member"><span class="role">Bajo</span><span class="name">Samuel Fuentes</span></div>
-                            <div class="team-member"><span class="role">Batería</span><span class="name">David Guerra</span></div>
-                        </div>
+                        <div class="team-list" id="team-jueves-pm"></div>
                     </div>
                 </div>
             </div>
@@ -378,8 +379,7 @@ body {
         <div class="day-column" id="col-viernes">
             <div class="column-title" style="color: var(--ensancha-blue);">Viernes 5</div>
             
-            <div class="service-card">
-                <div class="service-card-inner">
+            <div class="service-card"> <div class="service-card-inner">
                     <div class="card-front viernes-am">
                         <div class="card-header">
                             <span class="service-title">SERVICIO • AM</span>
@@ -388,10 +388,7 @@ body {
                         <div class="table-container">
                             <table>
                                 <thead><tr><th>Canción</th><th style="text-align:center">Tono</th><th style="text-align:center">BPM</th></tr></thead>
-                                <tbody id="songs-viernes-am"> <tr><td>1. Glorioso Intercambio</td><td class="td-tono">C</td><td class="td-bpm">72</td></tr>
-                                    <tr><td>2. Espíritu Santo Ven</td><td class="td-tono">F</td><td class="td-bpm">65</td></tr>
-                                    <tr><td>3. Rey de Reyes</td><td class="td-tono">D</td><td class="td-bpm">110</td></tr>
-                                </tbody>
+                                <tbody id="songs-viernes-am"></tbody>
                             </table>
                         </div>
                     </div>
@@ -400,17 +397,12 @@ body {
                             <span class="service-title" style="color:var(--ensancha-cyan)">Equipo • Viernes AM</span>
                             <span class="hint-team" onclick="toggleFlip(this.closest('.service-card'))" style="cursor: pointer;">Lista ↻</span>
                         </div>
-                        <div class="team-list" id="team-viernes-am"> <div class="team-member"><span class="role">Líder</span><span class="name">Esteban Herrera</span></div>
-                            <div class="team-member"><span class="role">Piano</span><span class="name">Mateo Díaz</span></div>
-                            <div class="team-member"><span class="role">Guitarra</span><span class="name">Luis Mario</span></div>
-                            <div class="team-member"><span class="role">Batería</span><span class="name">Josué Pellecer</span></div>
-                        </div>
+                        <div class="team-list" id="team-viernes-am"></div>
                     </div>
                 </div>
             </div>
 
-            <div class="service-card">
-                <div class="service-card-inner">
+            <div class="service-card"> <div class="service-card-inner">
                     <div class="card-front viernes-pm">
                         <div class="card-header">
                             <span class="service-title">SERVICIO • PM</span>
@@ -419,10 +411,7 @@ body {
                         <div class="table-container">
                             <table>
                                 <thead><tr><th>Canción</th><th style="text-align:center">Tono</th><th style="text-align:center">BPM</th></tr></thead>
-                                <tbody id="songs-viernes-pm"> <tr><td>1. Altar de Adoración</td><td class="td-tono">E</td><td class="td-bpm">68</td></tr>
-                                    <tr><td>2. Gracia Sublime Es</td><td class="td-tono">B</td><td class="td-bpm">82</td></tr>
-                                    <tr><td>3. Hosanna en las Alturas</td><td class="td-tono">G</td><td class="td-bpm">120</td></tr>
-                                </tbody>
+                                <tbody id="songs-viernes-pm"></tbody>
                             </table>
                         </div>
                     </div>
@@ -431,11 +420,7 @@ body {
                             <span class="service-title" style="color:var(--ensancha-cyan)">Equipo • Viernes PM</span>
                             <span class="hint-team" onclick="toggleFlip(this.closest('.service-card'))" style="cursor: pointer;">Lista ↻</span>
                         </div>
-                        <div class="team-list" id="team-viernes-pm"> <div class="team-member"><span class="role">Líder</span><span class="name">Carlos Alvarado</span></div>
-                            <div class="team-member"><span class="role">Piano</span><span class="name">Juan Marcos</span></div>
-                            <div class="team-member"><span class="role">Bajo</span><span class="name">Christian Ordóñez</span></div>
-                            <div class="team-member"><span class="role">Batería</span><span class="name">Josué Pellecer</span></div>
-                        </div>
+                        <div class="team-list" id="team-viernes-pm"></div>
                     </div>
                 </div>
             </div>
@@ -444,8 +429,7 @@ body {
         <div class="day-column" id="col-sabado">
             <div class="column-title" style="color: var(--ensancha-orange);">Sábado 6</div>
             
-            <div class="service-card">
-                <div class="service-card-inner">
+            <div class="service-card"> <div class="service-card-inner">
                     <div class="card-front sabado-am">
                         <div class="card-header">
                             <span class="service-title">SERVICIO • AM</span>
@@ -454,10 +438,7 @@ body {
                         <div class="table-container">
                             <table>
                                 <thead><tr><th>Canción</th><th style="text-align:center">Tono</th><th style="text-align:center">BPM</th></tr></thead>
-                                <tbody id="songs-sabado-am"> <tr><td>1. La Bondad de Dios</td><td class="td-tono">G</td><td class="td-bpm">67</td></tr>
-                                    <tr><td>2. En la Tierra como en el Cielo</td><td class="td-tono">D</td><td class="td-bpm">115</td></tr>
-                                    <tr><td>3. Perfume a tus Pies</td><td class="td-tono">E</td><td class="td-bpm">66</td></tr>
-                                </tbody>
+                                <tbody id="songs-sabado-am"></tbody>
                             </table>
                         </div>
                     </div>
@@ -466,17 +447,12 @@ body {
                             <span class="service-title" style="color:var(--ensancha-cyan)">Equipo • Sábado AM</span>
                             <span class="hint-team" onclick="toggleFlip(this.closest('.service-card'))" style="cursor: pointer;">Lista ↻</span>
                         </div>
-                        <div class="team-list" id="team-sabado-am"> <div class="team-member"><span class="role">Líder</span><span class="name">Esteban Herrera</span></div>
-                            <div class="team-member"><span class="role">Piano</span><span class="name">Mateo Díaz</span></div>
-                            <div class="team-member"><span class="role">Guitarra</span><span class="name">Andrés López</span></div>
-                            <div class="team-member"><span class="role">Batería</span><span class="name">David Guerra</span></div>
-                        </div>
+                        <div class="team-list" id="team-sabado-am"></div>
                     </div>
                 </div>
             </div>
 
-            <div class="service-card">
-                <div class="service-card-inner">
+            <div class="service-card"> <div class="service-card-inner">
                     <div class="card-front sabado-pm">
                         <div class="card-header">
                             <span class="service-title">Clausura • PM</span>
@@ -485,10 +461,7 @@ body {
                         <div class="table-container">
                             <table>
                                 <thead><tr><th>Canción</th><th style="text-align:center">Tono</th><th style="text-align:center">BPM</th></tr></thead>
-                                <tbody id="songs-sabado-pm"> <tr><td>1. Doble Porción (Lema)</td><td class="td-tono">A</td><td class="td-bpm">128</td></tr>
-                                    <tr><td>2. Ruido de Oleada</td><td class="td-tono">Fm</td><td class="td-bpm">135</td></tr>
-                                    <tr><td>3. Santo es el Señor</td><td class="td-tono">D</td><td class="td-bpm">70</td></tr>
-                                </tbody>
+                                <tbody id="songs-sabado-pm"></tbody>
                             </table>
                         </div>
                     </div>
@@ -497,11 +470,7 @@ body {
                             <span class="service-title" style="color:var(--ensancha-cyan)">Equipo • Sábado PM</span>
                             <span class="hint-team" onclick="toggleFlip(this.closest('.service-card'))" style="cursor: pointer;">Lista ↻</span>
                         </div>
-                        <div class="team-list" id="team-sabado-pm"> <div class="team-member"><span class="role">Líder</span><span class="name">Gaby de Alvarado</span></div>
-                            <div class="team-member"><span class="role">Piano</span><span class="name">Juan Marcos</span></div>
-                            <div class="team-member"><span class="role">Guitarra</span><span class="name">Andrés López</span></div>
-                            <div class="team-member"><span class="role">Batería</span><span class="name">David Guerra</span></div>
-                        </div>
+                        <div class="team-list" id="team-sabado-pm"></div>
                     </div>
                 </div>
             </div>
