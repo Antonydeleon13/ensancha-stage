@@ -177,27 +177,22 @@
     .service-card {
         background-color: transparent;
         perspective: 1000px;
-        min-height: 200px;
         height: auto; 
+        margin-bottom: 0; /* Quitamos márgenes forzados */
     }
 
-    /* MODIFICADO: Quitamos posición absoluta fija para permitir que el alto sea flexible */
     .service-card-inner {
         position: relative;
         width: 100%;
         height: 100%;
         transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         transform-style: preserve-3d;
-        cursor: pointer;
     }
 
     .service-card.flipped .service-card-inner { transform: rotateY(180deg); }
 
-    /* MODIFICADO: Ajustamos el 'backface-visibility' para soportar alturas dinámicas sin bug visual */
     .card-front, .card-back {
-        position: relative; 
         width: 100%;
-        min-height: 200px;
         height: auto;
         -webkit-backface-visibility: hidden;
         backface-visibility: hidden;
@@ -211,10 +206,29 @@
         box-shadow: 0 10px 25px rgba(0,0,0,0.8);
     }
 
-    /* MODIFICADO: El reverso se posiciona de forma absoluta solo al voltearse para emparejar el espacio */
-    .service-card.flipped .card-front { position: absolute; visibility: hidden; }
-    .card-back { background: #090614; border-left: 4px solid var(--ensancha-cyan); transform: rotateY(180deg); }
-    .service-card.flipped .card-back { position: relative; visibility: visible; }
+    /* LÓGICA INTELIGENTE: Ocultamos el bloque que no se usa para colapsar el espacio al 100% */
+    .card-front { 
+        position: relative; 
+    }
+    .service-card.flipped .card-front { 
+        position: absolute; 
+        top: 0; left: 0; 
+        opacity: 0; 
+        visibility: hidden; 
+    }
+
+    .card-back { 
+        background: #090614; 
+        border-left: 4px solid var(--ensancha-cyan); 
+        transform: rotateY(180deg); 
+        position: absolute; 
+        top: 0; left: 0; 
+        visibility: hidden; 
+    }
+    .service-card.flipped .card-back { 
+        position: relative; 
+        visibility: visible; 
+    }
 
     /* Bordes de color según bloque/luces del logo */
     .jueves-am { border-left: 4px solid var(--ensancha-yellow); }
