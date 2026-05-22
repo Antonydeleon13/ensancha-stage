@@ -22,21 +22,36 @@
             --text-muted: #4e576f;
         }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-black);
-            color: #ffffff;
-            margin: 0;
-            padding: 16px;
-            box-sizing: border-box;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            overflow-x: hidden;
-            letter-spacing: -0.2px;
-        }
+        /* BUSCA Y REEMPLAZA ESTO EN LOS ESTILOS DE TU INDEX.HTML */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-black);
+    color: #ffffff;
+    margin: 0;
+    padding: 16px;
+    box-sizing: border-box;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    /* MODIFICADO: Aseguramos el scroll vertical si el contenido sobrepasa la pantalla */
+    overflow-y: auto; 
+    overflow-x: hidden;
+    letter-spacing: -0.2px;
+    padding-bottom: 80px; /* Espacio extra abajo para que el reproductor multimedia no tape nada */
+}
 
+/* Ajuste para que las tablas internas de las tarjetas muestren su propio scroll si hay muchas canciones */
+.table-container { 
+    flex: 1; 
+    overflow-y: auto; 
+    max-height: 170px; /* Limita la altura interna para que la tarjeta no se deforme */
+}
+
+/* Custom Scrollbar sutil para las tablas de canciones (opcional, se ve limpio) */
+.table-container::-webkit-scrollbar { width: 4px; }
+.table-container::-webkit-scrollbar-track { background: transparent; }
+.table-container::-webkit-scrollbar-thumb { background: #141923; border-radius: 2px; }
         body::before {
             content: '';
             position: absolute;
