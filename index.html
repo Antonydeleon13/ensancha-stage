@@ -44,11 +44,9 @@ body {
 /* Ajuste para que las tablas internas de las tarjetas muestren su propio scroll si hay muchas canciones */
 .table-container { 
     flex: 1; 
-    overflow-y: auto; 
-    max-height: 170px; 
-    
-    /* AGREGA ESTA LÍNEA ESPECÍFICA */
-    -webkit-overflow-scrolling: touch; 
+    overflow-y: auto !important; /* El !important obliga a que el scroll vertical sí o sí funcione */
+    max-height: 165px; /* Evita que la tabla rompa el tamaño de la tarjeta */
+    -webkit-overflow-scrolling: touch; /* Suaviza el touch en iPhones */
 }
 
 /* Custom Scrollbar sutil para las tablas de canciones (opcional, se ve limpio) */
@@ -198,13 +196,16 @@ body {
         }
 
         .service-card-inner {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-            transform-style: preserve-3d;
-            cursor: pointer;
-        }
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    transform-style: preserve-3d;
+    cursor: pointer;
+    
+    /* AGREGA ESTA LÍNEA CLAVE */
+    overflow: visible; 
+}
 
         .service-card.flipped .service-card-inner { transform: rotateY(180deg); }
 
@@ -247,7 +248,11 @@ body {
 
         /* TABLA DE CANCIONES */
         .table-container { flex: 1; overflow-y: auto; }
-        table { width: 100%; border-collapse: collapse; }
+        table { 
+    width: 100%; 
+    border-collapse: collapse;
+    display: table;
+}
         th { font-size: 9px; text-transform: uppercase; color: var(--text-muted); padding: 4px 6px; text-align: left; border-bottom: 1px solid #141923; font-weight: 700; }
         td { padding: 8px 6px; font-size: 13px; font-weight: 600; border-bottom: 1px solid #06080d; }
         .td-tono { font-family: 'JetBrains Mono', monospace; color: var(--ensancha-cyan); font-weight: 800; text-align: center; font-size: 12px;}
