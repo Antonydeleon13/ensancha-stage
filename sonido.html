@@ -3,615 +3,418 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chronos — Control de Audio & Stageplot</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-    
+    <title>Control de Audio & Stage Plot • Ensancha 2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=JetBrains+Mono:wght@700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #08090d;
-            --window-bg: rgba(18, 20, 29, 0.65);
-            --text-main: #ffffff;
-            --text-muted: #8e95a5;
-            --text-labels: #94a3b8;
+            --bg-black: #000000; 
+            --panel-bg: #090c14; 
+            --ensancha-yellow: #ffcc00;
+            --ensancha-green: #00cc66;
+            --ensancha-blue: #00a0ff;
+            --ensancha-pink: #ff66b2;
+            --ensancha-orange: #ff7b00;
+            --ensancha-cyan: #00ffcc;
+            --text-muted: #4e576f;
             --border-window: rgba(255, 255, 255, 0.06);
-            --success: #34d399;
-            --audio-gold: #d4a359;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
+            background-color: var(--bg-black);
+            color: #ffffff;
+            margin: 0;
+            padding: 16px;
+            box-sizing: border-box;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow-x: hidden;
+            letter-spacing: -0.2px;
         }
 
-        /* Top Bar */
-        .top-navbar {
+        body::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px;
+            background: linear-gradient(90deg, var(--ensancha-yellow), var(--ensancha-green), var(--ensancha-blue), var(--ensancha-pink), var(--ensancha-orange), var(--ensancha-cyan));
+            z-index: 100;
+        }
+
+        .main-header {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 1.25rem 2rem; background: rgba(8, 9, 13, 0.6);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border-window); position: sticky; top: 0; z-index: 100;
+            border-bottom: 1px solid #141923; padding-bottom: 10px; margin-bottom: 20px; margin-top: 5px;
         }
-        .nav-brand { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.25rem; letter-spacing: -0.02em; }
-        .user-tag { font-size: 0.75rem; font-weight: 600; color: var(--audio-gold); background: rgba(212, 163, 89, 0.05); padding: 0.35rem 0.75rem; border-radius: 20px; border: 1px solid rgba(212, 163, 89, 0.2); }
+        .title-main { font-size: 22px; font-weight: 900; letter-spacing: 2px; margin: 0; font-family: 'Syne', sans-serif; }
+        .title-sub { font-size: 11px; font-weight: 700; letter-spacing: 5px; color: var(--ensancha-cyan); text-transform: uppercase; margin-top: 2px; }
+        .badge-admin { background: var(--ensancha-cyan); color: #000; padding: 5px 12px; border-radius: 4px; font-size: 10px; font-weight: 700; letter-spacing: 1px; }
 
-        /* Layout Grid */
-        .portal-container {
-            flex: 1; display: grid; grid-template-columns: 300px 1fr; gap: 1.5rem;
-            max-width: 1800px; width: 100%; margin: 0 auto; padding: 1.5rem;
+        .admin-tabs { display: flex; gap: 5px; margin-bottom: 15px; background: #04060a; padding: 4px; border-radius: 8px; border: 1px solid var(--border-window); }
+        .admin-tab-btn { flex: 1; background: transparent; border: none; color: var(--text-muted); padding: 12px; font-weight: 700; font-size: 13px; cursor: pointer; border-radius: 6px; transition: all 0.2s; text-transform: uppercase; letter-spacing: 1px; }
+        .admin-tab-btn.active { background: #141923; border: 1px solid rgba(255,255,255,0.05); color: var(--ensancha-yellow); }
+
+        .grid-audio { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        @media(min-width: 1200px) { .grid-audio { grid-template-columns: 310px 1fr; } }
+
+        .panel {
+            background: var(--panel-bg); border: 1px solid #141923; border-radius: 12px; padding: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.9); height: fit-content; display: flex; flex-direction: column;
         }
+        .panel-title { font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 15px; border-bottom: 1px solid #141923; padding-bottom: 8px; }
 
-        .panel-window {
-            background: var(--window-bg); border: 1px solid var(--border-window);
-            border-radius: 20px; padding: 1.5rem; height: calc(100vh - 140px);
-            display: flex; flex-direction: column; overflow: hidden;
-            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-        }
-        .panel-window h3 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.15rem; margin-bottom: 1rem; }
-
-        .scrollable-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0.6rem; }
-        .scrollable-list::-webkit-scrollbar, .stage-canvas::-webkit-scrollbar, .table-wrapper::-webkit-scrollbar { width: 6px; height: 6px; }
-        .scrollable-list::-webkit-scrollbar-thumb, .stage-canvas::-webkit-scrollbar-thumb, .table-wrapper::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); border-radius: 10px; }
-
-        /* Items de la lista de servicios */
-        .service-item {
-            background: rgba(255, 255, 255, 0.01); border: 1px solid rgba(255, 255, 255, 0.02);
-            border-radius: 12px; padding: 1rem; cursor: pointer; transition: all 0.2s;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .service-item:hover { background: rgba(255, 255, 255, 0.02); border-color: rgba(255, 255, 255, 0.05); }
-        .service-item.active { background: rgba(212, 163, 89, 0.05); border-color: rgba(212, 163, 89, 0.25); }
-        .service-info h5 { font-size: 0.85rem; font-weight: 600; }
-        .service-meta { text-align: right; font-size: 0.7rem; color: var(--text-muted); }
-
-        /* Workspace principal estructurado */
-        .audio-workspace { display: grid; grid-template-rows: 1fr 340px; gap: 1.5rem; height: 100%; overflow: hidden; }
-        .top-workspace-row { display: grid; grid-template-columns: 260px 1fr; gap: 1.5rem; height: 100%; overflow: hidden; }
-
-        /* Bóveda de músicos disponibles */
-        .musicians-vault { display: flex; flex-direction: column; gap: 0.5rem; overflow-y: auto; padding-right: 0.25rem; }
+        /* Banca de músicos del día */
+        .musicians-vault { display: flex; flex-direction: column; gap: 0.5rem; max-height: 650px; overflow-y: auto; padding-right: 4px; }
         .draggable-musician {
             background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-window);
-            padding: 0.6rem 0.8rem; border-radius: 10px; font-size: 0.8rem; font-weight: 600;
+            padding: 0.7rem 0.85rem; border-radius: 8px; font-size: 0.8rem; font-weight: 600;
             cursor: grab; display: flex; justify-content: space-between; align-items: center;
-            transition: transform 0.2s, border-color 0.2s;
+            transition: all 0.2s;
         }
-        .draggable-musician:active { cursor: grabbing; transform: scale(0.98); }
-        .draggable-musician .musician-role { font-size: 0.65rem; color: var(--audio-gold); font-weight: 700; text-transform: uppercase; }
+        .draggable-musician:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2); }
+        .draggable-musician .musician-role { font-size: 0.65rem; color: var(--ensancha-pink); font-weight: 700; text-transform: uppercase; background: rgba(255, 102, 178, 0.1); padding: 2px 6px; border-radius: 4px; }
 
-        /* 🎪 EL ESCENARIO (STAGEPLOT CANVAS) */
+        /* 🎪 STAGE PLOT CANVAS */
+        .stage-container { display: grid; grid-template-rows: 450px 1fr; gap: 20px; }
         .stage-canvas {
-            background: radial-gradient(circle at center, #161924 0%, #0a0b10 100%);
-            border: 2px dashed rgba(212, 163, 89, 0.15); border-radius: 16px;
-            position: relative; overflow: hidden; height: 100%;
+            background: radial-gradient(circle at center, #111524 0%, #040508 100%);
+            border: 2px dashed rgba(0, 255, 204, 0.15); border-radius: 12px;
+            position: relative; overflow: hidden; width: 100%; height: 100%;
         }
         .stage-canvas::before {
-            content: "FONDO DEL ESCENARIO (BATERÍA / SECUENCIAS / METALES)";
+            content: "LÍNEA TRASERA (BATERÍA / SECUENCIAS / RACKS)";
             position: absolute; top: 1rem; left: 50%; transform: translateX(-50%);
-            font-size: 0.65rem; color: rgba(255,255,255,0.15); font-weight: 800; letter-spacing: 0.1em;
+            font-size: 0.65rem; color: rgba(255,255,255,0.12); font-weight: 800; letter-spacing: 0.15em; white-space: nowrap;
         }
         .stage-canvas::after {
-            content: "FRENTE DEL ESCENARIO (PÚBLICO / ALTAR)";
+            content: "LÍNEA FRONTAL (VOCES / ALTAR PRINCIPAL / PÚBLICO)";
             position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%);
-            font-size: 0.65rem; color: rgba(255,255,255,0.15); font-weight: 800; letter-spacing: 0.1em;
+            font-size: 0.65rem; color: rgba(255,255,255,0.12); font-weight: 800; letter-spacing: 0.15em; white-space: nowrap;
         }
 
-        /* Ficha del músico posicionada dentro del escenario */
+        /* Ficha Escenario */
         .placed-musician {
-            position: absolute; background: #12141d; border: 1px solid var(--audio-gold);
-            padding: 0.5rem 0.75rem; border-radius: 8px; font-size: 0.75rem;
+            position: absolute; background: #060912; border: 1px solid var(--ensancha-cyan);
+            padding: 0.7rem 0.6rem; border-radius: 8px; font-size: 0.75rem;
             display: flex; flex-direction: column; gap: 0.2rem; cursor: move;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.6); min-width: 120px; text-align: center;
-            z-index: 10;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.9); min-width: 130px; text-align: center; z-index: 10;
         }
-        .placed-musician strong { color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .placed-musician span { color: var(--audio-gold); font-size: 0.6rem; font-weight: 700; }
-        .btn-remove-node { position: absolute; top: -6px; right: -6px; width: 16px; height: 16px; background: #f87171; border: none; border-radius: 50%; color: #000; font-size: 0.6rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .placed-musician strong { color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; font-size: 12px; }
+        .placed-musician span { color: var(--ensancha-yellow); font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .btn-remove-node { position: absolute; top: -7px; right: -7px; width: 18px; height: 18px; background: #ff4444; border: none; border-radius: 50%; color: #fff; font-size: 0.65rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
 
-        /* 📋 INPUT LIST: Tabla técnica inferior */
-        .input-list-window { display: flex; flex-direction: column; overflow: hidden; }
-        .table-wrapper { flex: 1; overflow-y: auto; border-radius: 12px; border: 1px solid var(--border-window); }
-        
+        .musician-tag-container { display: flex; flex-direction: column; gap: 3px; margin-top: 5px; width: 100%; }
+        .mini-audio-tag { background: rgba(0, 255, 204, 0.06); border: 1px solid rgba(0, 255, 204, 0.15); color: #c7fff4; font-size: 0.6rem; padding: 2px 4px; border-radius: 4px; text-align: left; font-family: 'JetBrains Mono', monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        /* 📋 INPUT LIST TABLE */
+        .table-wrapper { overflow-x: auto; border-radius: 8px; border: 1px solid #141923; background: #04060a; margin-top: 5px; }
         .input-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.8rem; }
-        .input-table th { background: #131520; color: var(--text-labels); font-weight: 600; padding: 0.75rem 1rem; text-transform: uppercase; font-size: 0.65rem; letter-spacing: 0.05em; position: sticky; top: 0; z-index: 5; }
-        .input-table td { padding: 0.6rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.02); vertical-align: middle; }
+        .input-table th { background: #0d111a; color: var(--text-muted); font-weight: 700; padding: 12px; text-transform: uppercase; font-size: 0.65rem; letter-spacing: 0.05em; border-bottom: 1px solid #141923; }
+        .input-table td { padding: 8px 12px; border-bottom: 1px solid #141923; vertical-align: middle; }
         
         .input-table input, .input-table select {
-            background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05);
-            color: #fff; padding: 0.35rem 0.6rem; border-radius: 6px; font-size: 0.75rem; outline: none; width: 100%;
+            background: #000000; border: 1px solid #141923;
+            color: #fff; padding: 7px 10px; border-radius: 6px; font-size: 0.75rem; outline: none; width: 100%; box-sizing: border-box;
         }
-        .input-table input:focus, .input-table select:focus { border-color: var(--audio-gold); }
-        
-        .ch-number { font-weight: 700; color: var(--audio-gold); width: 45px; text-align: center; }
-        
-        .btn-save-audio {
-            background: var(--audio-gold); color: #000; border: none; padding: 0.6rem 1.4rem;
-            border-radius: 8px; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.8rem;
-            cursor: pointer; transition: opacity 0.2s; width: fit-content; margin-top: 0.75rem; align-self: flex-end;
-            box-shadow: 0 4px 12px rgba(212, 163, 89, 0.2);
-        }
-        .btn-save-audio:hover { opacity: 0.9; }
+        .input-table input:focus, .input-table select:focus { border-color: var(--ensancha-cyan); }
+        .ch-number { font-weight: 800; color: var(--ensancha-green); text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
 
-        .empty-state { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; color: var(--text-muted); font-size: 0.8rem; text-align: center; }
-
-        /* 🌟 NUEVOS ESTILOS: Bloque independiente de secuencias */
-        .sequence-card {
-            background: rgba(255, 255, 255, 0.01); border: 1px solid var(--border-window);
-            padding: 0.85rem 1rem; border-radius: 12px; display: flex; flex-direction: column; gap: 0.55rem;
-            margin-top: 0.25rem;
+        .btn {
+            background: #ffffff; color: #000000; border: none; padding: 12px 24px; font-weight: 700;
+            border-radius: 6px; cursor: pointer; text-transform: uppercase; font-size: 11px; letter-spacing: 1px; transition: all 0.2s;
         }
-        .checkbox-label {
-            display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: rgba(255,255,255,0.85); cursor: pointer; user-select: none;
-        }
-        .checkbox-label input {
-            accent-color: var(--audio-gold); cursor: pointer; width: 14px; height: 14px;
-        }
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-cyan { background: var(--ensancha-cyan); color: #000; box-shadow: 0 4px 15px rgba(0, 255, 204, 0.2); }
+        .btn-add-ch { background: rgba(255,255,255,0.02); color: #8e95a5; border: 1px dashed #141923; padding: 10px; font-size: 11px; margin-top: 12px; border-radius: 6px; width: 100%; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+        .btn-add-ch:hover { background: rgba(0, 255, 204, 0.04); border-color: var(--ensancha-cyan); color: var(--ensancha-cyan); }
 
-        /* Estilos Premium para los Mini-Tags dentro del Stageplot */
-        .musician-tag-container {
-            display: flex;
-            flex-direction: row; /* Fuerza la alineación en fila */
-            flex-wrap: wrap;     /* Permite pasar a la siguiente línea con elegancia si no cabe */
-            gap: 0.3rem;
-            justify-content: center;
-            margin-top: 0.5rem;
-            max-height: 56px;    /* Límite para que no deforme la tarjeta principal */
-            overflow-y: auto;    /* Scroll interno ultra-fino si satura de canales */
-            padding: 0 0.25rem;
-            width: 100%;
-        }
-
-        /* Ocultar barra de scroll para mantener el minimalismo visual */
-        .musician-tag-container::-webkit-scrollbar { display: none; }
-
-        .mini-audio-tag {
-            background: rgba(52, 211, 153, 0.1) !important;
-            border: 1px solid rgba(52, 211, 153, 0.25) !important;
-            color: #a7f3d0 !important;
-            font-size: 0.625rem;
-            font-weight: 600;
-            padding: 0.2rem 0.45rem;
-            border-radius: 5px;
-            display: inline-flex;
-            align-items: center;
-            white-space: nowrap; /* Evita que el texto de la línea se parta en dos */
-        }
-
-
-        .btn-remove-tag {
-            background: transparent;
-            border: none;
-            color: #f87171;
-            font-size: 0.65rem;
-            font-weight: 800;
-            cursor: pointer;
-            padding: 0;
-            line-height: 1;
-        }
-        .btn-remove-tag:hover { color: #ef4444; }
-        
-        .input-add-tag {
-            background: rgba(0,0,0,0.4) !important;
-            border: 1px dashed rgba(212, 163, 89, 0.3) !important;
-            color: #fff !important;
-            font-size: 0.6rem !important;
-            padding: 0.15rem 0.3rem !important;
-            border-radius: 4px !important;
-            text-align: center;
-            width: 80px !important;
-            margin: 0.3rem auto 0 auto;
-            outline: none;
-        }
-        .input-add-tag::placeholder { color: rgba(255,255,255,0.25); }
-        .input-add-tag:focus { border-style: solid !important; border-color: var(--audio-gold) !important; }
-
+        .empty-state { color: var(--text-muted); font-size: 0.75rem; font-style: italic; text-align: center; padding: 20px 0; }
+        .footer-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px; }
     </style>
 </head>
 <body>
 
-    <div class="top-navbar">
-        <div class="nav-brand">CHRONOS — RACK DE AUDIO</div>
-        <div class="user-tag">🎚️ CONTROL DE MEZCLA & STAGEPLOT ACTIVOS</div>
+<div class="main-header" style="display: block; text-align: center; border-bottom: 1px solid #141923; padding-bottom: 15px; margin-top: 5px;">
+        <img src="https://firebasestorage.googleapis.com/v0/b/ensancha-gestion.firebasestorage.app/o/IMG_0665.JPG?alt=media" alt="Ensancha Doble Porción" style="width: 100%; max-width: 600px; height: auto; display: block; margin: 0 auto; border-radius: 4px;">
+        
+        <div class="logo-area" style="margin-top: 15px; margin-bottom: 10px;">
+            <h2 class="title-main" style="margin: 0;">ENSANCHA 2026</h2>
+            <span class="title-sub">Rider de Audio & Stage Plot</span>
+        </div>
+
     </div>
 
-    <div class="portal-container">
+    <div class="admin-tabs">
+        <button class="admin-tab-btn active" onclick="switchAudioDay('jueves')">Jueves</button>
+        <button class="admin-tab-btn" onclick="switchAudioDay('viernes')">Viernes</button>
+        <button class="admin-tab-btn" onclick="switchAudioDay('sabado')">Sábado</button>
+    </div>
+
+    <h3 id="audio-block-title" style="font-size: 15px; margin-bottom: 15px; color: var(--ensancha-yellow); text-transform: uppercase; letter-spacing: 1.5px;">Día Activo: JUEVES</h3>
+
+    <div class="grid-audio">
         
-        <div class="panel-window">
-            <h3>Servicios Activos</h3>
-            <div class="scrollable-list" id="audioServicesContainer">
-                <div class="empty-state">Buscando programaciones en la nube...</div>
+        <div class="panel">
+            <div class="panel-title" style="color: var(--ensancha-pink)">Músicos Asignados Hoy</div>
+            <div class="musicians-vault" id="vaultMúsicos">
+                <div class="empty-state">Buscando alineación del día...</div>
             </div>
         </div>
 
-        <div class="panel-window" id="audioWorkspaceWindow">
-            <div class="empty-state">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:0.3; margin-bottom:0.5rem;"><path d="M12 2v20M17 5v14M22 9v6M7 8v8M2 10v4"/></svg>
-                Selecciona un servicio para estructurar el Stageplot e Input List del Lineup asignado.
+        <div class="stage-container">
+            
+            <div class="stage-canvas" id="escenarioStageplot"></div>
+
+            <div class="panel" style="margin-bottom: 40px;">
+                <div class="panel-title" style="color: var(--ensancha-cyan); margin-bottom: 5px;">🎚️ Input List del Altar</div>
+                <div class="table-wrapper">
+                    <table class="input-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px; text-align: center;">CH</th>
+                                <th style="width: 240px;">Músico en Escenario</th>
+                                <th style="width: 200px;">Instrumento / Línea</th>
+                                <th style="width: 200px;">Tipo de Conexión</th>
+                                <th>Notas / Monitoreo (In-Ears)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyInputList"></tbody>
+                    </table>
+                </div>
+
+                <button type="button" class="btn-add-ch" onclick="addExtraChannelRow()">+ Añadir Canal Extra a la Consola</button>
+
+                <div class="footer-actions">
+                    <button type="button" class="btn btn-cyan" onclick="saveAudioConfigDay()">Guardar Configuración del Día</button>
+                </div>
             </div>
+
         </div>
 
     </div>
 
     <script type="module">
-      import { auth, db } from "./firebase-config.js";
-        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-        import { collection, query, orderBy, onSnapshot, doc, updateDoc, where, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        let selectedServiceId = null;
-        let lineupMúsicosEsteServicio = [];
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrdNyJnjeeoqGUrCQYKNIOfTaZf59WkbE",
+            authDomain: "ensancha-gestion.firebaseapp.com",
+            projectId: "ensancha-gestion",
+            storageBucket: "ensancha-gestion.firebasestorage.app",
+            messagingSenderId: "692646472593",
+            appId: "1:692646472593:web:1022e5eef8f2c3a9fc4830"
+        };
 
-        const servicesContainer = document.getElementById('audioServicesContainer');
-        const workspaceWindow = document.getElementById('audioWorkspaceWindow');
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-        // Middleware de Seguridad Básico
-        onAuthStateChanged(auth, (user) => {
-            if (!user) window.location.href = '/index.html';
-        });
+        let cronogramaGlobal = {};
+        let currentDay = 'jueves';
+        let currentChannelCount = 0;
+        let musicosDelDiaActual = []; // Filtrados dinámicamente
 
-        // 📅 ESCUCHA EN TIEMPO REAL DE LOS SERVICIOS DESDE FIRESTORE
-        const qServices = query(collection(db, "services"), orderBy("date", "asc"));
-        onSnapshot(qServices, (snapshot) => {
-            servicesContainer.innerHTML = "";
-            if(snapshot.empty) {
-                servicesContainer.innerHTML = `<div class="empty-state">No hay servicios programados todavía.</div>`;
+        window.switchAudioDay = function(day) {
+            document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            currentDay = day;
+            renderAudioWorkspace();
+        }
+
+        async function loadAudioConfigInicial() {
+            const docSnap = await getDoc(doc(db, "cronograma", "eventos"));
+            if (docSnap.exists()) {
+                cronogramaGlobal = docSnap.data();
+            }
+            renderAudioWorkspace();
+        }
+
+        // 🎻 FILTRAR Y RENDERIZAR LA BANCA EXCLUSIVA DEL DÍA SELECCIONADO
+        function filtrarYRenderizarBancaDelDia() {
+            const vault = document.getElementById('vaultMúsicos');
+            vault.innerHTML = '';
+
+            const setUnico = new Map();
+            const turnos = ['am', 'pm'];
+
+            // Extraer músicos de la mañana y de la tarde del día actual únicamente
+            turnos.forEach(t => {
+                const musicos = cronogramaGlobal[currentDay]?.[t]?.musicos || [];
+                musicos.forEach(m => {
+                    if(m.nombre && m.nombre.trim() !== "") {
+                        setUnico.set(m.nombre.trim(), m.rol || "Músico");
+                    }
+                });
+            });
+
+            musicosDelDiaActual = Array.from(setUnico, ([nombre, rol]) => ({ nombre, rol }));
+
+            // 📋 ORDEN TÉCNICO E ESTRATÉGICO DE LA BANDA
+            const ordenPrioridad = [
+                "keys 1",
+                "keys 2",
+                "bajo",
+                "guitarra",
+                "batería",
+                "bateria",
+                "percu"
+            ];
+
+            // Ordenamiento inteligente basado en la matriz de arriba
+            musicosDelDiaActual.sort((a, b) => {
+                const rolA = (a.rol || "").toLowerCase().trim();
+                const rolB = (b.rol || "").toLowerCase().trim();
+
+                let indexA = ordenPrioridad.findIndex(p => rolA.includes(p));
+                let indexB = ordenPrioridad.findIndex(p => rolB.includes(p));
+
+                // Si un rol no está mapeado (ej: voces o directores), se envía al fondo
+                if (indexA === -1) indexA = 999;
+                if (indexB === -1) indexB = 999;
+
+                if (indexA !== indexB) {
+                    return indexA - indexB;
+                }
+                
+                // Si dos músicos comparten exactamente el mismo rol, los ordena alfabéticamente
+                return a.nombre.localeCompare(b.nombre);
+            });
+
+            if (musicosDelDiaActual.length === 0) {
+                vault.innerHTML = `<div class="empty-state">No hay músicos asignados en el cronograma para este día.</div>`;
                 return;
             }
 
-            snapshot.forEach((docSnap) => {
-                const id = docSnap.id;
-                const service = docSnap.data();
-
-                let fechaPartes = service.date ? service.date.split('-') : [];
-                let fechaFormateada = fechaPartes.length === 3 ? `${fechaPartes[2]}/${fechaPartes[1]}/${fechaPartes[0]}` : service.date || 'N/A';
-
-                const item = document.createElement('div');
-                item.className = `service-item ${id === selectedServiceId ? 'active' : ''}`;
-                item.innerHTML = `
-                    <div class="service-info">
-                        <h5>${service.title}</h5>
+            musicosDelDiaActual.forEach((m, idx) => {
+                vault.insertAdjacentHTML('beforeend', `
+                    <div class="draggable-musician" draggable="true" id="day-musico-${idx}" data-nombre="${m.nombre}" data-rol="${m.rol}">
+                        <span>${m.nombre}</span>
+                        <span class="musician-role">${m.rol}</span>
                     </div>
-                    <div class="service-meta">
-                        <div>${fechaFormateada}</div>
-                    </div>
-                `;
-
-                item.addEventListener('click', () => {
-                    selectedServiceId = id;
-                    document.querySelectorAll('.service-item').forEach(el => el.classList.remove('active'));
-                    item.classList.add('active');
-                    cargarConsolaAudio(service);
-                });
-
-                servicesContainer.appendChild(item);
-
-                // Mantener actualización en tiempo real en caso de estar editando la hoja abierta
-                if(id === selectedServiceId) {
-                    cargarConsolaAudio(service);
-                }
-            });
-        });
-
-        // 🎛️ CONSTRUCCIÓN GENERAL DE LA MESA DE AUDIO
-       async function cargarConsolaAudio(service) {
-            const rolesGuardados = service.roles || {};
-            lineupMúsicosEsteServicio = [];
-
-            // Lista de palabras clave para filtrar únicamente los roles del altar
-            const rolesValidos = ["predicador", "alabanza", "piano", "bajo", "guitarra", "batería", "bateria", "secuencias", "director", "vocal", "coros"];
-
-            // 🌟 PASO A: Mapear y buscar las fotos de perfil en Firestore/Storage en tiempo real
-            const promesasMiembros = Object.entries(rolesGuardados).map(async ([puestoKey, asignadoValue]) => {
-                let nombreMúsico = asignadoValue;
-                let instrumentoReal = puestoKey;
-
-                if (asignadoValue && asignadoValue.includes('__')) {
-                    const partes = asignadoValue.split('__');
-                    nombreMúsico = partes[0];
-                    instrumentoReal = partes[1];
-                }
-
-                if(nombreMúsico && nombreMúsico !== 'Sin asignar') {
-                    const puestoLower = instrumentoReal.toLowerCase();
-                    const esRolValido = rolesValidos.some(rol => puestoLower.includes(rol));
-
-                    if (esRolValido) {
-                        let fotoPerfil = null;
-
-                        try {
-                            // 🔍 Cruce de datos directo con la colección unificada de fichas técnicas
-                            const personasRef = collection(db, "people"); 
-                            const q = query(personasRef, where("fullName", "==", nombreMúsico));
-                            const querySnapshot = await getDocs(q);
-                            
-                            if (!querySnapshot.empty) {
-                                const personaData = querySnapshot.docs[0].data();
-                                // Captura la propiedad exacta 'avatar' donde se almacena el link de Storage
-                                fotoPerfil = personaData.avatar || null;
-                            }
-                        } catch (error) {
-                            console.error("Error al rescatar avatar de Storage para " + nombreMúsico, error);
-                        }
-
-                        lineupMúsicosEsteServicio.push({
-                            nombre: nombreMúsico,
-                            rol: instrumentoReal,
-                            foto: fotoPerfil
-                        });
-                    }
-                }
-            });
-
-            // Esperamos que terminen todas las consultas a la base de datos antes de pintar el HTML
-            await Promise.all(promesasMiembros);
-
-            // 🌟 PASO B: Renderizar la interfaz visual del Workspace de Audio
-            workspaceWindow.innerHTML = `
-                <div class="audio-workspace">
-                    
-                    <div class="top-workspace-row">
-                        <div style="display:flex; flex-direction:column; gap:0.75rem; height:100%;">
-                            <div>
-                                <p style="font-size:0.7rem; font-weight:700; color:var(--text-labels); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.4rem;">Lineup de Hoy</p>
-                                <div class="musicians-vault" id="vaultMúsicos"></div>
-                            </div>
-                        </div>
-                        <div class="stage-canvas" id="escenarioStageplot"></div>
-                    </div>
-
-                    <div class="input-list-window">
-                        <p style="font-size:0.7rem; font-weight:700; color:var(--text-labels); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.5rem;">🎚️ Input List & Mapeo de Canales</p>
-                        <div class="table-wrapper">
-                            <table class="input-table">
-                                <thead>
-                                    <tr>
-                                        <th style="width:50px; text-align:center;">CH</th>
-                                        <th style="width:240px;">Músico en Escenario</th>
-                                        <th style="width:180px;">Instrumento / Línea</th>
-                                        <th style="width:220px;">Tipo Conexión</th>
-                                        <th>Accesorios/Observaciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tbodyInputList"></tbody>
-                            </table>
-                        </div>
-                        <button type="button" class="btn-save-audio" id="btnGuardarFichaSonido">Guardar</button>
-                    </div>
-
-                </div>
-            `;
-
-            // 1. Inyectar los servidores en la barra lateral con su foto correspondiente
-            const vault = document.getElementById('vaultMúsicos');
-            if(lineupMúsicosEsteServicio.length === 0) {
-                vault.innerHTML = `<p style="font-size:0.75rem; color:var(--text-muted); font-style:italic;">No hay servidores asignados en admin todavía.</p>`;
-            } else {
-                lineupMúsicosEsteServicio.forEach((musico, idx) => {
-                    const fotoMapeada = musico.foto ? musico.foto : "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238e95a5'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5-3.33-8-3.33z'/></svg>";
-
-                    vault.insertAdjacentHTML('beforeend', `
-                        <div class="draggable-musician" draggable="true" id="musico-node-${idx}" data-nombre="${musico.nombre}" data-rol="${musico.rol}">
-                            <span>${musico.nombre.split(' ')[0]}</span>
-                            <span class="musician-role">${musico.rol}</span>
-                        </div>
-                    `);
-                    
-                    document.getElementById(`musico-node-${idx}`).addEventListener('dragstart', (e) => {
-                        e.dataTransfer.setData("text/plain", JSON.stringify({
-                            nombre: musico.nombre,
-                            rol: musico.rol,
-                            foto: fotoMapeada
-                        }));
-                        // 🌟 NUEVO: Guardamos el ID propio de la tarjeta para poder ocultarla en el Drop
-                        e.dataTransfer.setData("origin-id", `musico-node-${idx}`);
-                    
-                    });
-                });
-            }
-
-            // 2. Pintar nodos recuperados guardados previamente en el Stageplot
-            const canvasEscenario = document.getElementById('escenarioStageplot');
-            const plotGuardado = service.audioConfig?.stageplot || [];
-            
-            plotGuardado.forEach((nodo) => {
-                let fotoDeRespaldo = nodo.foto;
-                if(!fotoDeRespaldo || fotoDeRespaldo.startsWith('data:image/svg')) {
-                    const coincidencia = lineupMúsicosEsteServicio.find(m => m.nombre === nodo.nombre);
-                    if(coincidencia && coincidencia.foto) fotoDeRespaldo = coincidencia.foto;
-                }
-                
-                const todasLasTarjetas = document.querySelectorAll('.draggable-musician');
-                todasLasTarjetas.forEach(tarjeta => {
-                    if (tarjeta.getAttribute('data-nombre') === nodo.nombre) {
-                        tarjeta.style.display = 'none';
-                    }
-                });
-
-                // 🌟 NUEVO: Le pasamos 'nodo.tags' al final para que los pinte al abrir el servicio
-                inyectarNodoMúsicoEnEscenario(canvasEscenario, nodo.nombre, nodo.rol, nodo.posX, nodo.posY, fotoDeRespaldo, nodo.tags || []);
-            });
-
-
-            // ⚡ MOTOR DE SINCRONIZACIÓN AUTOMÁTICA ENTRE INPUT LIST Y STAGEPLOT
-        window.sincronizarCanalesConStageplot = function() {
-            // 1. Agrupar qué canales e instrumentos tiene asignado cada músico en la tabla de abajo
-            const mapaMusicoCanales = {};
-
-            for (let ch = 1; ch <= 16; ch++) {
-                const selectMusico = document.getElementById(`input-musico-${ch}`);
-                const inputInst = document.getElementById(`input-inst-${ch}`);
-                
-                if (selectMusico && selectMusico.value) {
-                    const nombreSeleccionado = selectMusico.value;
-                    const instrumentoTexto = inputInst ? inputInst.value.trim() : "";
-
-                    if (!mapaMusicoCanales[nombreSeleccionado]) {
-                        mapaMusicoCanales[nombreSeleccionado] = [];
-                    }
-                    
-                    // Almacenamos el número de canal y lo que tocará en esa línea
-                    mapaMusicoCanales[nombreSeleccionado].push({
-                        canal: ch,
-                        linea: instrumentoTexto ? instrumentoTexto : "línea abierta"
-                    });
-                }
-            }
-
-            // 2. Buscar cada tarjeta del escenario y actualizarle sus tags de consola automáticamente
-            document.querySelectorAll('.placed-musician').forEach(tarjeta => {
-                const nombreCompleto = tarjeta.getAttribute('data-fullname');
-                const contenedorTags = tarjeta.querySelector('.musician-tag-container');
-                
-                if (contenedorTags) {
-                    contenedorTags.innerHTML = ""; // Limpiamos tags viejos
-                    
-                    const asignaciones = mapaMusicoCanales[nombreCompleto];
-                    if (asignaciones && asignaciones.length > 0) {
-                        // Si el músico tiene asignado uno o varios canales, pintamos sus tags premium
-                        asignaciones.forEach(asig => {
-                            const span = document.createElement('span');
-                            span.className = 'mini-audio-tag';
-                            span.style.background = 'rgba(52, 211, 153, 0.12)'; // Tono verde/esmeralda tipo consola encendida
-                            span.style.borderColor = 'rgba(52, 211, 153, 0.3)';
-                            span.style.color = '#a7f3d0';
-                            span.innerHTML = `<span style="color:var(--audio-gold); font-weight:800; font-size:0.55rem; margin-right:2px;">CH ${asig.canal}:</span> ${asig.linea}`;
-                            contenedorTags.appendChild(span);
-                        });
-                    }
-                }
-            });
-        };
-        
-
-            canvasEscenario.addEventListener('dragover', (e) => e.preventDefault());
-            canvasEscenario.addEventListener('drop', (e) => {
-                e.preventDefault();
-                const datosCrudos = e.dataTransfer.getData("text/plain");
-                if(!datosCrudos) return;
-                
-                const datos = JSON.parse(datosCrudos);
-                const rect = canvasEscenario.getBoundingClientRect();
-                
-                const posX = ((e.clientX - rect.left) / rect.width) * 100;
-                const posY = ((e.clientY - rect.top) / rect.height) * 100;
-
-                // 🌟 NUEVO: Ocultar el elemento de la barra lateral al soltarlo exitosamente en el mapa
-                // Usamos el ID del nodo de origen que guardamos al iniciar el arrastre
-                const originId = e.dataTransfer.getData("origin-id");
-                if (originId) {
-                    const originEl = document.getElementById(originId);
-                    if (originEl) originEl.style.display = 'none';
-                }
-
-                inyectarNodoMúsicoEnEscenario(canvasEscenario, datos.nombre, datos.rol, posX, posY, datos.foto);
-            });
-
-            // 3. Renderizar filas fijas de los 16 canales
-            const tbody = document.getElementById('tbodyInputList');
-            const listaInputsGuardada = service.audioConfig?.inputList || {};
-
-            let optionsMúsicos = `<option value="">— Canal Libre / Vacío —</option>`;
-            lineupMúsicosEsteServicio.forEach(m => {
-                optionsMúsicos += `<option value="${m.nombre}">${m.nombre}</option>`;
-            });
-
-            for (let ch = 1; ch <= 16; ch++) {
-                const dataCh = listaInputsGuardada[`ch_${ch}`] || { musico: "", instrumento: "", conexion: "Línea Directa (DI)", notas: "" };
-                
-                tbody.insertAdjacentHTML('beforeend', `
-                    <tr>
-                        <td class="ch-number">${ch}</td>
-                        <td>
-                            <select id="input-musico-${ch}" class="mixer-trigger-select">
-                                ${optionsMúsicos}
-                            </select>
-                        </td>
-                        <td><input type="text" id="input-inst-${ch}" class="mixer-trigger-input" placeholder="Ej: Kick in, Snare, Voz L" value="${dataCh.instrumento}"></td>
-                        <td>
-                            <select id="input-con-${ch}">
-                                <option value="Línea Directa (DI)" ${dataCh.conexion === 'Línea Directa (DI)' ? 'selected' : ''}>Línea Directa (DI)</option>
-                                <option value="Micrófono Shure SM57" ${dataCh.conexion === 'Micrófono Shure SM57' ? 'selected' : ''}>Micrófono Shure SM57</option>
-                                <option value="Micrófono Inalámbrico Vocal" ${dataCh.conexion === 'Micrófono Inalámbrico Vocal' ? 'selected' : ''}>Micrófono Inalámbrico Vocal</option>
-                                <option value="Caja Directa Stereo" ${dataCh.conexion === 'Caja Directa Stereo' ? 'selected' : ''}>Caja Directa Stereo</option>
-                                <option value="Conexión XLR Directa" ${dataCh.conexion === 'Conexión XLR Directa' ? 'selected' : ''}>Conexión XLR Directa</option>
-                            </select>
-                        </td>
-                        <td><input type="text" id="input-notas-${ch}" placeholder="Accesorios u observaciones..." value="${dataCh.notas}"></td>
-                    </tr>
                 `);
 
-                document.getElementById(`input-musico-${ch}`).value = dataCh.musico;
-
-                // 🌟 NUEVO: Si cambias el músico de este canal o escribes el instrumento, el Stageplot se redibuja solo al instante
-                document.getElementById(`input-musico-${ch}`).addEventListener('change', () => window.sincronizarCanalesConStageplot());
-                document.getElementById(`input-inst-${ch}`).addEventListener('input', () => window.sincronizarCanalesConStageplot());
-            }
-
-            // Activar una sincronización inicial por si ya había datos guardados previos en la nube
-            setTimeout(() => { window.sincronizarCanalesConStageplot(); }, 200);
+                const itemEl = document.getElementById(`day-musico-${idx}`);
+                itemEl.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData("text/plain", JSON.stringify({ nombre: m.nombre, rol: m.rol }));
+                });
+            });
         }
 
-        // 🎪 FUNCIÓN DE INYECCIÓN Y ARRASTRE DE TARJETAS EN ESCENARIO (MOUSE DRAG INTERNO)
-        function inyectarNodoMúsicoEnEscenario(canvas, nombre, rol, x, y, fotoUrl) {
-            const idNodo = 'node-' + Math.random().toString(36).substring(2, 9);
-            const imagenSegura = fotoUrl ? fotoUrl : "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238e95a5'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5-3.33-8-3.33z'/></svg>";
+        // 🎛️ CONSTRUIR WORKSPACE COMPLETO
+        window.renderAudioWorkspace = function() {
+            document.getElementById('audio-block-title').innerText = `Día Activo: ${currentDay.toUpperCase()}`;
+            
+            // Generar la banca limpia según el día activo
+            filtrarYRenderizarBancaDelDia();
+            
+            const dayData = cronogramaGlobal[currentDay] || {};
+            const configAudioDia = dayData.audioConfigDay || {};
+            const inputListGuardado = configAudioDia.inputList || [];
+            const stageplotGuardado = configAudioDia.stageplot || [];
 
+            const tbody = document.getElementById('tbodyInputList');
+            tbody.innerHTML = '';
+            currentChannelCount = 0;
+
+            // Generar selectores restringidos a los músicos de este día
+            let optionsMusicos = `<option value="">— Canal Libre —</option>`;
+            musicosDelDiaActual.forEach(m => {
+                optionsMusicos += `<option value="${m.nombre}">${m.nombre} (${m.rol})</option>`;
+            });
+
+            const canalesAGenerar = Math.max(16, inputListGuardado.length);
+            for (let i = 0; i < canalesAGenerar; i++) {
+                const backupData = inputListGuardado[i] || { musico: "", instrumento: "", conexion: "Línea Directa (DI)", notas: "" };
+                appendChannelRow(i + 1, optionsMusicos, backupData);
+            }
+
+            const canvas = document.getElementById('escenarioStageplot');
+            canvas.innerHTML = '';
+
+            stageplotGuardado.forEach(nodo => {
+                inyectarMusicoAlEscenarioCanvas(canvas, nodo.nombre, nodo.rol, nodo.posX, nodo.posY);
+            });
+
+            sincronizarEtiquetasStageplot();
+        }
+
+        function appendChannelRow(chNumber, optionsHtml, data) {
+            const tbody = document.getElementById('tbodyInputList');
+            const tr = document.createElement('tr');
+            tr.className = 'channel-row-item';
+            tr.innerHTML = `
+                <td class="ch-number">${chNumber}</td>
+                <td><select class="sel-musico-ch">${optionsHtml}</select></td>
+                <td><input type="text" class="inp-inst-ch" placeholder="Ej: Voz Lead, Bajo, Teclado L" value="${data.instrumento}"></td>
+                <td>
+                    <select class="sel-con-ch">
+                        <option value="Línea Directa (DI)" ${data.conexion === 'Línea Directa (DI)' ? 'selected' : ''}>Línea Directa (DI)</option>
+                        <option value="Micrófono Vocal Inalámbrico" ${data.conexion === 'Micrófono Vocal Inalámbrico' ? 'selected' : ''}>Micrófono Vocal Inalámbrico</option>
+                        <option value="Micrófono Shure SM57" ${data.conexion === 'Micrófono Shure SM57' ? 'selected' : ''}>Micrófono Shure SM57</option>
+                        <option value="Caja Directa Stereo (DI)" ${data.conexion === 'Caja Directa Stereo (DI)' ? 'selected' : ''}>Caja Directa Stereo (DI)</option>
+                        <option value="Conexión XLR Directa" ${data.conexion === 'Conexión XLR Directa' ? 'selected' : ''}>Conexión XLR Directa</option>
+                    </select>
+                </td>
+                <td><input type="text" class="inp-notas-ch" placeholder="Monitoreo, EQ, notas..." value="${data.notas}"></td>
+            `;
+
+            tbody.appendChild(tr);
+            tr.querySelector('.sel-musico-ch').value = data.musico;
+
+            tr.querySelector('.sel-musico-ch').addEventListener('change', () => sincronizarEtiquetasStageplot());
+            tr.querySelector('.inp-inst-ch').addEventListener('input', () => sincronizarEtiquetasStageplot());
+            
+            currentChannelCount = chNumber;
+        }
+
+        window.addExtraChannelRow = function() {
+            let optionsMusicos = `<option value="">— Canal Libre —</option>`;
+            musicosDelDiaActual.forEach(m => { optionsMusicos += `<option value="${m.nombre}">${m.nombre} (${m.rol})</option>`; });
+            appendChannelRow(currentChannelCount + 1, optionsMusicos, { musico: "", instrumento: "", conexion: "Línea Directa (DI)", notas: "" });
+        }
+
+        const canvasEscenario = document.getElementById('escenarioStageplot');
+        canvasEscenario.addEventListener('dragover', (e) => e.preventDefault());
+        canvasEscenario.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const rawData = e.dataTransfer.getData("text/plain");
+            if (!rawData) return;
+
+            const datos = JSON.parse(rawData);
+            const rect = canvasEscenario.getBoundingClientRect();
+            const posX = ((e.clientX - rect.left) / rect.width) * 100;
+            const posY = ((e.clientY - rect.top) / rect.height) * 100;
+
+            let duplicado = false;
+            document.querySelectorAll('.placed-musician').forEach(el => {
+                if(el.getAttribute('data-fullname') === datos.nombre) duplicado = true;
+            });
+
+            if(!duplicado) {
+                inyectarMusicoAlEscenarioCanvas(canvasEscenario, datos.nombre, datos.rol, posX, posY);
+                sincronizarEtiquetasStageplot();
+            }
+        });
+
+        function inyectarMusicoAlEscenarioCanvas(canvas, nombre, rol, x, y) {
+            const idNodo = 'node-' + Math.random().toString(36).substring(2, 9);
             const div = document.createElement('div');
             div.className = 'placed-musician';
             div.id = idNodo;
             div.style.left = `${x}%`;
             div.style.top = `${y}%`;
-            
-            // Reajustamos a dimensiones ultra-compactas, simétricas y estéticas
-            div.style.minWidth = '115px';
-            div.style.padding = '0.65rem 0.5rem';
-            
             div.setAttribute('data-fullname', nombre);
-            
-            // Renderizado minimalista: Incluye el botón "+" en la parte inferior de la tarjeta
+
             div.innerHTML = `
                 <button class="btn-remove-node" id="btn-del-${idNodo}">✕</button>
-                <div style="width: 36px; height: 36px; border-radius: 50%; overflow: hidden; margin: 0 auto 0.35rem auto; border: 1.5px solid var(--audio-gold); background: rgba(0,0,0,0.3);">
-                    <img src="${imagenSegura}" style="width: 100%; height: 100%; object-fit: cover;">
-                </div>
-                <strong style="font-size: 0.785rem; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; line-height: 1.2;">${nombre.split(' ')[0]}</strong>
-                <span style="font-size: 0.585rem; color: var(--text-muted); display: block; margin-top: 0.05rem; text-transform: uppercase; letter-spacing: 0.02em;">${rol}</span>
-                
-                <button type="button" id="btn-pop-${idNodo}" style="margin-top: 0.5rem; background: rgba(212, 163, 89, 0.08); border: 1px solid rgba(212, 163, 89, 0.25); color: var(--audio-gold); font-size: 0.65rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 5px; cursor: pointer; transition: all 0.2s; width: 100%;" onmouseover="this.style.background='var(--audio-gold)'; this.style.color='#000'" onmouseout="this.style.background='rgba(212, 163, 89, 0.08)'; this.style.color='var(--audio-gold)'">
-                    + ver rider
-                </button>
+                <strong>${nombre}</strong>
+                <span>${rol}</span>
+                <div class="musician-tag-container"></div>
             `;
 
             canvas.appendChild(div);
 
-            // ⚡ ACCIÓN: Al darle clic al "+", recopila los datos vigentes de la tabla de abajo y abre la modal
-            document.getElementById(`btn-pop-${idNodo}`).onclick = (e) => {
-                e.stopPropagation();
-                window.abrirFichaTecnicaMusico(nombre, rol, imagenSegura);
-            };
-
-            // Manejo del click de eliminación de la tarjeta
             document.getElementById(`btn-del-${idNodo}`).onclick = (e) => {
                 e.stopPropagation();
-                const todasLasTarjetas = document.querySelectorAll('.draggable-musician');
-                todasLasTarjetas.forEach(tarjeta => {
-                    if (tarjeta.getAttribute('data-nombre') === nombre) {
-                        tarjeta.style.display = 'flex';
-                    }
-                });
                 div.remove();
+                sincronizarEtiquetasStageplot();
             };
 
-            // Drag de movimiento por el plano del altar
             div.onmousedown = function(event) {
-                // Si hacen clic en el botón "+", no arrastra la tarjeta para evitar molestias al presionar
-                if (event.target.id === `btn-pop-${idNodo}`) return;
-                
                 event.stopPropagation();
                 let shiftX = event.clientX - div.getBoundingClientRect().left;
                 let shiftY = event.clientY - div.getBoundingClientRect().top;
@@ -621,8 +424,8 @@
                     let newX = ((clientX - canvasRect.left - shiftX) / canvasRect.width) * 100;
                     let newY = ((clientY - canvasRect.top - shiftY) / canvasRect.height) * 100;
                     
-                    if(newX >= 0 && newX <= 88) div.style.left = newX + '%';
-                    if(newY >= 0 && newY <= 92) div.style.top = newY + '%';
+                    if(newX >= 0 && newX <= 85) div.style.left = newX + '%';
+                    if(newY >= 0 && newY <= 88) div.style.top = newY + '%';
                 }
 
                 function onMouseMove(e) { moveAt(e.clientX, e.clientY); }
@@ -633,140 +436,77 @@
                     document.onmouseup = null;
                 };
             };
-
             div.ondragstart = () => false;
         }
 
-     
+        window.sincronizarEtiquetasStageplot = function() {
+            const mapaMusicoCanales = {};
 
-        // ☁️ GUARDADO Y COMPILACIÓN HACIA LA NUBE
-        async function guardarFichaTecnicaAudioNube() {
-            if(!selectedServiceId) return;
+            document.querySelectorAll('.channel-row-item').forEach(row => {
+                const ch = row.querySelector('.ch-number').innerText;
+                const musico = row.querySelector('.sel-musico-ch').value;
+                const instrumento = row.querySelector('.inp-inst-ch').value.trim();
 
-            // 1. Mapeo del Stageplot (Almacena coordenadas X, Y y foto, los tags se autocalculan abajo)
+                if (musico) {
+                    if (!mapaMusicoCanales[musico]) mapaMusicoCanales[musico] = [];
+                    mapaMusicoCanales[musico].push({ ch: ch, linea: instrumento || "Línea Activa" });
+                }
+            });
+
+            document.querySelectorAll('.placed-musician').forEach(tarjeta => {
+                const nombreCompleto = tarjeta.getAttribute('data-fullname');
+                const contenedorTags = tarjeta.querySelector('.musician-tag-container');
+                contenedorTags.innerHTML = '';
+
+                const ruteos = mapaMusicoCanales[nombreCompleto];
+                if (ruteos) {
+                    ruteos.forEach(r => {
+                        contenedorTags.insertAdjacentHTML('beforeend', `
+                            <div class="mini-audio-tag">CH ${r.ch}: ${r.linea}</div>
+                        `);
+                    });
+                }
+            });
+        }
+
+        window.saveAudioConfigDay = async function() {
             const stageNodes = [];
             document.querySelectorAll('.placed-musician').forEach(div => {
                 stageNodes.push({
-                    nombre: div.getAttribute('data-fullname'), // Recupera el nombre completo seguro
+                    nombre: div.getAttribute('data-fullname'),
                     rol: div.querySelector('span').innerText,
                     posX: parseFloat(div.style.left),
-                    posY: parseFloat(div.style.top),
-                    foto: div.querySelector('img').src
+                    posY: parseFloat(div.style.top)
                 });
             });
 
-            // 2. Mapeo estructural de las 16 filas del Input List libre
-            const inputListMap = {};
-            for (let ch = 1; ch <= 16; ch++) {
-                inputListMap[`ch_${ch}`] = {
-                    musico: document.getElementById(`input-musico-${ch}`).value,
-                    instrumento: document.getElementById(`input-inst-${ch}`).value,
-                    conexion: document.getElementById(`input-con-${ch}`).value,
-                    notas: document.getElementById(`input-notas-${ch}`).value
-                };
-            }
+            const inputListData = [];
+            document.querySelectorAll('.channel-row-item').forEach(row => {
+                inputListData.push({
+                    musico: row.querySelector('.sel-musico-ch').value,
+                    instrumento: row.querySelector('.inp-inst-ch').value,
+                    conexion: row.querySelector('.sel-con-ch').value,
+                    notas: row.querySelector('.inp-notas-ch').value
+                });
+            });
+
+            if (!cronogramaGlobal[currentDay]) cronogramaGlobal[currentDay] = {};
+
+            cronogramaGlobal[currentDay].audioConfigDay = {
+                stageplot: stageNodes,
+                inputList: inputListData
+            };
 
             try {
-                const serviceRef = doc(db, "services", selectedServiceId);
-                await updateDoc(serviceRef, {
-                    audioConfig: {
-                        stageplot: stageNodes,
-                        inputList: inputListMap
-                    }
-                });
-                alert("☁️ ¡Mapeo técnico inteligente guardado con éxito!");
+                await setDoc(doc(db, "cronograma", "eventos"), cronogramaGlobal);
+                alert(`☁️ ¡Configuración unificada para el ${currentDay.toUpperCase()} guardada con éxito!`);
             } catch (err) {
-                console.error("Error al almacenar la ficha técnica de audio:", err);
-                alert("Ocurrió un error al subir los parámetros técnicos.");
+                console.error(err);
+                alert("Error al guardar la configuración.");
             }
         }
 
-// 🌟 EXPOSICIÓN GLOBAL: ABRIR FICHA TÉCNICA EN VENTANA EMERGENTE
-        window.abrirFichaTecnicaMusico = function(nombreCompleto, puestoRol, urlFoto) {
-            const modal = document.getElementById('audioMusicianModal');
-            const targetChannels = document.getElementById('modalAudioChannelsTarget');
-            
-            // Asignar cabecera básica
-            document.getElementById('modalAudioName').innerText = nombreCompleto;
-            document.getElementById('modalAudioRole').innerText = puestoRol;
-            document.getElementById('modalAudioAvatar').src = urlFoto;
-            
-            targetChannels.innerHTML = ""; // Limpieza previa
-
-            let totalLineasDetectadas = 0;
-
-            // Escanear las 16 líneas de tu Input List actual buscando coincidencias
-            for (let ch = 1; ch <= 16; ch++) {
-                const selectMusico = document.getElementById(`input-musico-${ch}`);
-                
-                if (selectMusico && selectMusico.value === nombreCompleto) {
-                    totalLineasDetectadas++;
-                    
-                    const instrumento = document.getElementById(`input-inst-${ch}`)?.value || "Línea Abierta";
-                    const conexion = document.getElementById(`input-con-${ch}`)?.value || "DI";
-                    const observaciones = document.getElementById(`input-notas-${ch}`)?.value || "";
-
-                    // Inyectar el bloque de canal estilizado tipo Rack Profesional
-                    targetChannels.insertAdjacentHTML('beforeend', `
-                        <div style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.03); padding: 0.75rem 1rem; border-radius: 12px; display: flex; flex-direction: column; gap: 0.35rem;">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                    <span style="background: linear-gradient(135deg, #f3d081 0%, #d4a359 100%); color: #08090d; font-size: 0.65rem; font-weight: 800; padding: 0.2rem 0.5rem; border-radius: 6px; font-family: 'Syne';">CH ${ch}</span>
-                                    <strong style="color: #ffffff; font-size: 0.85rem; text-transform: capitalize;">${instrumento}</strong>
-                                </div>
-                                <span style="font-size: 0.7rem; color: var(--success); font-weight: 600; background: rgba(52, 211, 153, 0.05); padding: 0.15rem 0.4rem; border-radius: 4px; border: 1px solid rgba(52, 211, 153, 0.1);">${conexion}</span>
-                            </div>
-                            ${observaciones ? `<p style="font-size: 0.725rem; color: var(--text-muted); font-style: italic; margin-top: 0.1rem; padding-left: 0.25rem; border-left: 1px solid rgba(255,255,255,0.08);">${observaciones}</p>` : ''}
-                        </div>
-                    `);
-                }
-            }
-
-            // Si el músico no tiene ningún canal asignado abajo todavía
-            if (totalLineasDetectadas === 0) {
-                targetChannels.innerHTML = `
-                    <div style="color: var(--text-muted); font-size: 0.75rem; text-align: center; padding: 2rem 1rem; border: 1px dashed rgba(255,255,255,0.04); border-radius: 14px;">
-                        Este servidor no tiene asignado ningún canal en el Input List inferior en este momento.
-                    </div>
-                `;
-            }
-
-            // Animación fluida de apertura
-            modal.style.opacity = "1";
-            modal.style.pointerEvents = "auto";
-        };
-
-        // 🌟 EXPOSICIÓN GLOBAL: CERRAR FICHA TÉCNICA
-        window.cerrarFichaTecnicaMusico = function() {
-            const modal = document.getElementById('audioMusicianModal');
-            if (modal) {
-                modal.style.opacity = "0";
-                modal.style.pointerEvents = "none";
-            }
-        };
-
+        loadAudioConfigInicial();
     </script>
-
-
-<div id="audioMusicianModal" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(5, 5, 8, 0.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; z-index: 2000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;">
-        <div style="background: #12141d; border: 1px solid rgba(255,255,255,0.06); width: 90%; max-width: 500px; border-radius: 24px; padding: 2rem; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.6);">
-            
-            <button type="button" onclick="window.cerrarFichaTecnicaMusico()" style="position: absolute; top: 1.25rem; right: 1.25rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); color: #8e95a5; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.85rem; font-weight: bold; transition: background 0.2s;">✕</button>
-            
-            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 1rem;">
-                <img id="modalAudioAvatar" src="" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--audio-gold);">
-                <div>
-                    <h3 id="modalAudioName" style="font-family: 'Syne', sans-serif; font-size: 1.25rem; font-weight: 700; color: #fff;">—</h3>
-                    <p id="modalAudioRole" style="font-size: 0.7rem; color: var(--audio-gold); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-top: 0.1rem;">—</p>
-                </div>
-            </div>
-
-            <p style="font-size: 0.65rem; color: var(--text-labels); font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.75rem;">🎚️ Ruteo de Canales Asignados en Consola</p>
-            <div id="modalAudioChannelsTarget" style="display: flex; flex-direction: column; gap: 0.65rem; max-height: 280px; overflow-y: auto; padding-right: 0.25rem;">
-                </div>
-        </div>
-    </div>
-
-
 </body>
 </html>
