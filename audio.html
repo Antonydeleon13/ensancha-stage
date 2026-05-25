@@ -138,10 +138,11 @@
 
     </div>
 
-    <div class="admin-tabs">
+   <div class="admin-tabs">
         <button class="admin-tab-btn active" onclick="switchAudioDay('jueves')">Jueves</button>
         <button class="admin-tab-btn" onclick="switchAudioDay('viernes')">Viernes</button>
-        <button class="admin-tab-btn" onclick="switchAudioDay('sabado')">Sábado</button>
+        <button class="admin-tab-btn" onclick="switchAudioDay('sabado')">Sábado AM</button>
+        <button class="admin-tab-btn" onclick="switchAudioDay('sabado_pm')">Sábado PM</button>
     </div>
 
     <h3 id="audio-block-title" style="font-size: 15px; margin-bottom: 15px; color: var(--ensancha-yellow); text-transform: uppercase; letter-spacing: 1.5px;">Día Activo: JUEVES</h3>
@@ -208,6 +209,8 @@
         let currentChannelCount = 0;
         let musicosDelDiaActual = []; // Filtrados dinámicamente
 
+
+        // 🎻 FILTRAR Y RENDERIZAR LA BANCA EXCLUSIVA DEL BLOQUE SELECCIONADO (CON ORDEN TÉCNICO V2)
         window.switchAudioDay = function(day) {
             document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
             event.target.classList.add('active');
@@ -223,17 +226,24 @@
             renderAudioWorkspace();
         }
 
-        // 🎻 FILTRAR Y RENDERIZAR LA BANCA EXCLUSIVA DEL DÍA SELECCIONADO
+        // 🎻 FILTRAR Y RENDERIZAR LA BANCA EXCLUSIVA DEL BLOQUE SELECCIONADO
         function filtrarYRenderizarBancaDelDia() {
             const vault = document.getElementById('vaultMúsicos');
             vault.innerHTML = '';
 
             const setUnico = new Map();
-            const turnos = ['am', 'pm'];
+            let turnosAExtraer = ['am', 'pm'];
+            let diaAdmin = currentDay;
 
-            // Extraer músicos de la mañana y de la tarde del día actual únicamente
-            turnos.forEach(t => {
-                const musicos = cronogramaGlobal[currentDay]?.[t]?.musicos || [];
+            if (currentDay === 'sabado') {
+                turnosAExtraer = ['am'];
+            } else if (currentDay === 'sabado_pm') {
+                turnosAExtraer = ['pm'];
+                diaAdmin = 'sabado';
+            }
+
+            turnosAExtraer.forEach(t => {
+                const musicos = cronogramaGlobal[diaAdmin]?.[t]?.musicos || [];
                 musicos.forEach(m => {
                     if(m.nombre && m.nombre.trim() !== "") {
                         setUnico.set(m.nombre.trim(), m.rol || "Músico");
@@ -243,39 +253,24 @@
 
             musicosDelDiaActual = Array.from(setUnico, ([nombre, rol]) => ({ nombre, rol }));
 
-            // 📋 ORDEN TÉCNICO E ESTRATÉGICO DE LA BANDA
             const ordenPrioridad = [
-                "keys 1",
-                "keys 2",
-                "bajo",
-                "guitarra",
-                "batería",
-                "bateria",
-                "percu"
+                "vox1", "vox2", "vox3", "vox4", "vox5", "vox6", "vox7", "vox8",
+                "keys 1", "keys 2", "bajo", "guitarra", "batería", "bateria", "percu"
             ];
 
-            // Ordenamiento inteligente basado en la matriz de arriba
             musicosDelDiaActual.sort((a, b) => {
                 const rolA = (a.rol || "").toLowerCase().trim();
                 const rolB = (b.rol || "").toLowerCase().trim();
-
                 let indexA = ordenPrioridad.findIndex(p => rolA.includes(p));
                 let indexB = ordenPrioridad.findIndex(p => rolB.includes(p));
-
-                // Si un rol no está mapeado (ej: voces o directores), se envía al fondo
                 if (indexA === -1) indexA = 999;
                 if (indexB === -1) indexB = 999;
-
-                if (indexA !== indexB) {
-                    return indexA - indexB;
-                }
-                
-                // Si dos músicos comparten exactamente el mismo rol, los ordena alfabéticamente
+                if (indexA !== indexB) return indexA - indexB;
                 return a.nombre.localeCompare(b.nombre);
             });
 
             if (musicosDelDiaActual.length === 0) {
-                vault.innerHTML = `<div class="empty-state">No hay músicos asignados en el cronograma para este día.</div>`;
+                vault.innerHTML = `<div class="empty-state">No hay músicos asignados en este bloque.</div>`;
                 return;
             }
 
@@ -290,15 +285,17 @@
                 const itemEl = document.getElementById(`day-musico-${idx}`);
                 itemEl.addEventListener('dragstart', (e) => {
                     e.dataTransfer.setData("text/plain", JSON.stringify({ nombre: m.nombre, rol: m.rol }));
+                    // 🌟 CONFIGURACIÓN DRAG: Transferir ID de la banca lateral
+                    e.dataTransfer.setData("origin-id", `day-musico-${idx}`);
                 });
             });
         }
 
         // 🎛️ CONSTRUIR WORKSPACE COMPLETO
         window.renderAudioWorkspace = function() {
-            document.getElementById('audio-block-title').innerText = `Día Activo: ${currentDay.toUpperCase()}`;
+            let labelTitulo = currentDay.toUpperCase().replace('_', ' ');
+            document.getElementById('audio-block-title').innerText = `Bloque Activo: ${labelTitulo}`;
             
-            // Generar la banca limpia según el día activo
             filtrarYRenderizarBancaDelDia();
             
             const dayData = cronogramaGlobal[currentDay] || {};
@@ -310,7 +307,6 @@
             tbody.innerHTML = '';
             currentChannelCount = 0;
 
-            // Generar selectores restringidos a los músicos de este día
             let optionsMusicos = `<option value="">— Canal Libre —</option>`;
             musicosDelDiaActual.forEach(m => {
                 optionsMusicos += `<option value="${m.nombre}">${m.nombre} (${m.rol})</option>`;
@@ -327,6 +323,13 @@
 
             stageplotGuardado.forEach(nodo => {
                 inyectarMusicoAlEscenarioCanvas(canvas, nodo.nombre, nodo.rol, nodo.posX, nodo.posY);
+                
+                // 🌟 AL CARGAR: Si el músico ya está en el mapa, ocultarlo de la banca lateral
+                document.querySelectorAll('.draggable-musician').forEach(el => {
+                    if (el.getAttribute('data-nombre') === nodo.nombre) {
+                        el.style.display = 'none';
+                    }
+                });
             });
 
             sincronizarEtiquetasStageplot();
@@ -385,6 +388,13 @@
             });
 
             if(!duplicado) {
+                // 🌟 CONFIGURACIÓN DROP: Ocultar el elemento original de la lista izquierda
+                const originId = e.dataTransfer.getData("origin-id");
+                if (originId) {
+                    const originEl = document.getElementById(originId);
+                    if (originEl) originEl.style.display = 'none';
+                }
+
                 inyectarMusicoAlEscenarioCanvas(canvasEscenario, datos.nombre, datos.rol, posX, posY);
                 sincronizarEtiquetasStageplot();
             }
@@ -410,6 +420,14 @@
 
             document.getElementById(`btn-del-${idNodo}`).onclick = (e) => {
                 e.stopPropagation();
+                
+                // 🌟 AL QUITAR: Mostrar al músico de nuevo en la banca izquierda
+                document.querySelectorAll('.draggable-musician').forEach(el => {
+                    if (el.getAttribute('data-nombre') === nombre) {
+                        el.style.display = 'flex';
+                    }
+                });
+
                 div.remove();
                 sincronizarEtiquetasStageplot();
             };
@@ -499,7 +517,8 @@
 
             try {
                 await setDoc(doc(db, "cronograma", "eventos"), cronogramaGlobal);
-                alert(`☁️ ¡Configuración unificada para el ${currentDay.toUpperCase()} guardada con éxito!`);
+                let labelExito = currentDay.toUpperCase().replace('_', ' ');
+                alert(`☁️ ¡Configuración unificada para ${labelExito} guardada con éxito!`);
             } catch (err) {
                 console.error(err);
                 alert("Error al guardar la configuración.");
