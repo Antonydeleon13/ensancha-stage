@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Control de Audio & Stage Plot • Ensancha 2026</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=JetBrains+Mono:wght@700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         :root {
             --bg-black: #000000; 
@@ -57,7 +60,6 @@
         }
         .panel-title { font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 15px; border-bottom: 1px solid #141923; padding-bottom: 8px; }
 
-        /* Banca de músicos del día */
         .musicians-vault { display: flex; flex-direction: column; gap: 0.5rem; max-height: 650px; overflow-y: auto; padding-right: 4px; }
         .draggable-musician {
             background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-window);
@@ -71,34 +73,132 @@
         /* 🎪 STAGE PLOT CANVAS */
         .stage-container { display: grid; grid-template-rows: 450px 1fr; gap: 20px; }
         .stage-canvas {
-            background: radial-gradient(circle at center, #111524 0%, #040508 100%);
-            border: 2px dashed rgba(0, 255, 204, 0.15); border-radius: 12px;
-            position: relative; overflow: hidden; width: 100%; height: 100%;
+            background-color: #ffffff;
+            background-image: 
+                linear-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+            background-size: 20px 20px;
+            border: 2px solid #e2e8f0; 
+            border-radius: 12px;
+            position: relative; 
+            overflow: hidden; 
+            width: 100%; 
+            height: 100%;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.05);
         }
+        
         .stage-canvas::before {
             content: "LÍNEA TRASERA (BATERÍA / SECUENCIAS / RACKS)";
             position: absolute; top: 1rem; left: 50%; transform: translateX(-50%);
-            font-size: 0.65rem; color: rgba(255,255,255,0.12); font-weight: 800; letter-spacing: 0.15em; white-space: nowrap;
+            font-size: 0.65rem; color: rgba(0, 0, 0, 0.35); font-weight: 800; letter-spacing: 0.15em; white-space: nowrap;
+            z-index: 1;
         }
         .stage-canvas::after {
             content: "LÍNEA FRONTAL (VOCES / ALTAR PRINCIPAL / PÚBLICO)";
             position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%);
-            font-size: 0.65rem; color: rgba(255,255,255,0.12); font-weight: 800; letter-spacing: 0.15em; white-space: nowrap;
+            font-size: 0.65rem; color: rgba(0, 0, 0, 0.35); font-weight: 800; letter-spacing: 0.15em; white-space: nowrap;
+            z-index: 1;
         }
 
-        /* Ficha Escenario */
         .placed-musician {
-            position: absolute; background: #060912; border: 1px solid var(--ensancha-cyan);
-            padding: 0.7rem 0.6rem; border-radius: 8px; font-size: 0.75rem;
-            display: flex; flex-direction: column; gap: 0.2rem; cursor: move;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.9); min-width: 130px; text-align: center; z-index: 10;
+            position: absolute; 
+            background: transparent; 
+            border: none; 
+            padding: 0;
+            border-radius: 0;
+            font-size: 0.75rem;
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            gap: 2px; 
+            cursor: move;
+            box-shadow: none; 
+            min-width: 140px; 
+            text-align: center; 
+            z-index: 10;
         }
-        .placed-musician strong { color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; font-size: 12px; }
-        .placed-musician span { color: var(--ensancha-yellow); font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-        .btn-remove-node { position: absolute; top: -7px; right: -7px; width: 18px; height: 18px; background: #ff4444; border: none; border-radius: 50%; color: #fff; font-size: 0.65rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
 
-        .musician-tag-container { display: flex; flex-direction: column; gap: 3px; margin-top: 5px; width: 100%; }
-        .mini-audio-tag { background: rgba(0, 255, 204, 0.06); border: 1px solid rgba(0, 255, 204, 0.15); color: #c7fff4; font-size: 0.6rem; padding: 2px 4px; border-radius: 4px; text-align: left; font-family: 'JetBrains Mono', monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .instrument-icon-container {
+            font-size: calc(var(--zoom-instrumento, 70px) * 0.5); 
+            margin: 0 auto 4px auto;
+            color: #0f172a; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: var(--zoom-instrumento, 70px);
+            height: var(--zoom-instrumento, 70px);
+            min-height: var(--zoom-instrumento, 70px);
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+        }
+
+        .instrument-icon-container img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: contain !important;
+        }
+
+        .placed-musician strong { 
+            color: #0f172a; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            display: block; 
+            font-size: 11px; 
+            font-weight: 700;
+            line-height: 1.2;
+            cursor: pointer; /* Indica que es clickeable */
+            transition: color 0.2s;
+        }
+        .placed-musician strong:hover {
+            color: var(--ensancha-blue); /* Efecto visual al posarse en el nombre */
+        }
+
+        .placed-musician span { 
+            color: #64748b; 
+            font-size: 0.55rem; 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px; 
+        }
+
+        .btn-remove-node { 
+            position: absolute; 
+            top: -6px; 
+            right: 25px; 
+            width: 16px; 
+            height: 16px; 
+            background: #ff4444; 
+            border: none; 
+            border-radius: 50%; 
+            color: #fff; 
+            font-size: 0.55rem; 
+            font-weight: 900; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 20;
+            opacity: 0.4; 
+            transition: opacity 0.2s;
+        }
+        .placed-musician:hover .btn-remove-node {
+            opacity: 1;
+        }
+
+        .mini-audio-tag { 
+            background: #f1f5f9; 
+            border: 1px solid #cbd5e1; 
+            color: #334155; 
+            font-size: 0.55rem; 
+            padding: 2px 4px; 
+            border-radius: 4px; 
+            text-align: center; 
+            font-family: 'JetBrains Mono', monospace; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            white-space: nowrap; 
+        }
 
         /* 📋 INPUT LIST TABLE */
         .table-wrapper { overflow-x: auto; border-radius: 8px; border: 1px solid #141923; background: #04060a; margin-top: 5px; }
@@ -124,6 +224,64 @@
 
         .empty-state { color: var(--text-muted); font-size: 0.75rem; font-style: italic; text-align: center; padding: 20px 0; }
         .footer-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px; }
+
+        /* Contenedor flotante del Slider */
+        .stage-zoom-control {
+            background: rgba(15, 23, 42, 0.85); 
+            backdrop-filter: blur(4px);
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            color: #fff;
+            font-weight: 700;
+            user-select: none;
+        }
+
+        .stage-zoom-control input[type="range"] {
+            width: 80px;
+            accent-color: var(--ensancha-cyan); 
+            cursor: pointer;
+        }
+
+        /* 📡 VENTANA MODAL (INFO RUTEOS DEL MÚSICO) */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(6px);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 2000; opacity: 0; pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-card {
+            background: #090c14; border: 2px solid var(--ensancha-blue);
+            width: 100%; max-width: 500px; border-radius: 12px; padding: 25px;
+            box-shadow: 0 20px 50px rgba(0, 160, 255, 0.2);
+            position: relative; transform: translateY(-20px);
+            transition: transform 0.25s ease;
+        }
+        .modal-overlay.active .modal-card { transform: translateY(0); }
+        .modal-close {
+            position: absolute; top: 15px; right: 15px;
+            background: transparent; border: none; color: var(--text-muted);
+            font-size: 18px; cursor: pointer; transition: color 0.2s;
+        }
+        .modal-close:hover { color: #ff4444; }
+        .modal-header-profile { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; border-bottom: 1px solid #141923; padding-bottom: 15px; }
+        .modal-avatar-frame { width: 60px; height: 60px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-window); border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 4px; }
+        .modal-avatar-frame img { width: 100%; height: 100%; object-fit: contain; }
+        .modal-avatar-frame i { font-size: 28px; color: var(--ensancha-cyan); }
+        .modal-meta h4 { margin: 0; font-size: 18px; font-weight: 900; color: #fff; letter-spacing: 0.5px; }
+        .modal-meta span { font-size: 11px; font-weight: 800; color: var(--ensancha-yellow); text-transform: uppercase; letter-spacing: 1px; }
+        
+        .modal-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.8rem; text-align: left; }
+        .modal-table th { background: #0d111a; color: var(--text-muted); font-weight: 700; padding: 10px; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #141923; }
+        .modal-table td { padding: 10px; border-bottom: 1px solid #141923; color: #e2e8f0; }
+        .modal-ch-badge { font-family: 'JetBrains Mono', monospace; font-weight: 800; color: var(--ensancha-green); }
     </style>
 </head>
 <body>
@@ -135,8 +293,7 @@
             <h2 class="title-main" style="margin: 0;">ENSANCHA 2026</h2>
             <span class="title-sub">Rider de Audio & Stage Plot</span>
         </div>
-
-    </div>
+</div>
 
    <div class="admin-tabs">
         <button class="admin-tab-btn active" onclick="switchAudioDay('jueves')">Jueves</button>
@@ -145,16 +302,23 @@
         <button class="admin-tab-btn" onclick="switchAudioDay('sabado_pm')">Sábado PM</button>
     </div>
 
-    <h3 id="audio-block-title" style="font-size: 15px; margin-bottom: 15px; color: var(--ensancha-yellow); text-transform: uppercase; letter-spacing: 1.5px;">Día Activo: JUEVES</h3>
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h3 id="audio-block-title" style="font-size: 15px; color: var(--ensancha-yellow); text-transform: uppercase; letter-spacing: 1.5px; margin: 0;">Día Activo: JUEVES</h3>
+        
+        <div class="stage-zoom-control" draggable="false" onmousedown="event.stopPropagation();" style="display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.03); padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-window);">
+            <label for="sizeSlider" style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Tamaño:</label>
+            <input type="range" id="sizeSlider" min="40" max="120" value="70" oninput="ajustarTamanoEnVivo(this.value)" style="accent-color: var(--ensancha-cyan); width: 90px; cursor: pointer;">
+        </div>
+    </div>
 
     <div class="grid-audio">
         
         <div class="panel">
-            <div class="panel-title" style="color: var(--ensancha-pink)">Músicos Asignados Hoy</div>
-            <div class="musicians-vault" id="vaultMúsicos">
-                <div class="empty-state">Buscando alineación del día...</div>
-            </div>
-        </div>
+    <div class="panel-title" style="color: var(--ensancha-pink)">Músicos Asignados Hoy</div>
+    <div class="musicians-vault" id="vaultMúsicos">
+        <div class="empty-state">Buscando alineación del día...</div>
+    </div>
+</div>
 
         <div class="stage-container">
             
@@ -188,6 +352,35 @@
 
     </div>
 
+    <div class="modal-overlay" id="musicianModal" onclick="cerrarHojaEspecificaciones()">
+        <div class="modal-card" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="cerrarHojaEspecificaciones()">✕</button>
+            
+            <div class="modal-header-profile">
+                <div class="modal-avatar-frame" id="modalAvatar"></div>
+                <div class="modal-meta">
+                    <h4 id="modalNombreMusico">Nombre</h4>
+                    <span id="modalRolMusico">Rol</span>
+                </div>
+            </div>
+
+            <div class="panel-title" style="color: var(--ensancha-cyan); font-size: 11px; margin-bottom: 10px;">Líneas Asignadas en Consola</div>
+            <div style="max-height: 250px; overflow-y: auto;">
+                <table class="modal-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 60px; text-align: center;">CH</th>
+                            <th>Línea / Instrumento</th>
+                            <th>Conexión</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modalCanalesBody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -207,10 +400,9 @@
         let cronogramaGlobal = {};
         let currentDay = 'jueves';
         let currentChannelCount = 0;
-        let musicosDelDiaActual = []; // Filtrados dinámicamente
+        let musicosDelDiaActual = [];
 
 
-        // 🎻 FILTRAR Y RENDERIZAR LA BANCA EXCLUSIVA DEL BLOQUE SELECCIONADO (CON ORDEN TÉCNICO V2)
         window.switchAudioDay = function(day) {
             document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
             event.target.classList.add('active');
@@ -226,72 +418,282 @@
             renderAudioWorkspace();
         }
 
-        // 🎻 FILTRAR Y RENDERIZAR LA BANCA EXCLUSIVA DEL BLOQUE SELECCIONADO
-        function filtrarYRenderizarBancaDelDia() {
-            const vault = document.getElementById('vaultMúsicos');
-            vault.innerHTML = '';
+      function filtrarYRenderizarBancaDelDia() {
+    const vault = document.getElementById('vaultMúsicos');
+    vault.innerHTML = '';
 
-            const setUnico = new Map();
-            let turnosAExtraer = ['am', 'pm'];
-            let diaAdmin = currentDay;
+    const setUnico = new Map();
+    let turnosAExtraer = ['am', 'pm'];
+    let diaAdmin = currentDay;
 
-            if (currentDay === 'sabado') {
-                turnosAExtraer = ['am'];
-            } else if (currentDay === 'sabado_pm') {
-                turnosAExtraer = ['pm'];
-                diaAdmin = 'sabado';
+    if (currentDay === 'sabado') {
+        turnosAExtraer = ['am'];
+    } else if (currentDay === 'sabado_pm') {
+        turnosAExtraer = ['pm'];
+        diaAdmin = 'sabado';
+    }
+
+    turnosAExtraer.forEach(t => {
+        const musicos = cronogramaGlobal[diaAdmin]?.[t]?.musicos || [];
+        musicos.forEach(m => {
+            if(m.nombre && m.nombre.trim() !== "") {
+                setUnico.set(m.nombre.trim(), m.rol || "Músico");
             }
+        });
+    });
 
-            turnosAExtraer.forEach(t => {
-                const musicos = cronogramaGlobal[diaAdmin]?.[t]?.musicos || [];
-                musicos.forEach(m => {
-                    if(m.nombre && m.nombre.trim() !== "") {
-                        setUnico.set(m.nombre.trim(), m.rol || "Músico");
-                    }
-                });
+    musicosDelDiaActual = Array.from(setUnico, ([nombre, rol]) => ({ nombre, rol }));
+
+    const ordenPrioridad = [
+        "vox1", "vox2", "vox3", "vox4", "vox5", "vox6", "vox7", "vox8",
+        "keys 1", "keys 2", "bajo", "guitarra", "batería", "bateria", "percu"
+    ];
+
+    musicosDelDiaActual.sort((a, b) => {
+        const rolA = (a.rol || "").toLowerCase().trim();
+        const rolB = (b.rol || "").toLowerCase().trim();
+        let indexA = ordenPrioridad.findIndex(p => rolA.includes(p));
+        let indexB = ordenPrioridad.findIndex(p => rolB.includes(p));
+        if (indexA === -1) indexA = 999;
+        if (indexB === -1) indexB = 999;
+        if (indexA !== indexB) return indexA - indexB;
+        return a.nombre.localeCompare(b.nombre);
+    });
+
+    // RENDERIZAR MÚSICOS DE LA ALINEACIÓN
+    if (musicosDelDiaActual.length > 0) {
+        musicosDelDiaActual.forEach((m, idx) => {
+            vault.insertAdjacentHTML('beforeend', `
+                <div class="draggable-musician" draggable="true" id="day-musico-${idx}" data-nombre="${m.nombre}" data-rol="${m.rol}">
+                    <span>${m.nombre}</span>
+                    <span class="musician-role">${m.rol}</span>
+                </div>
+            `);
+
+            const itemEl = document.getElementById(`day-musico-${idx}`);
+            itemEl.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData("text/plain", JSON.stringify({ nombre: m.nombre, rol: m.rol }));
+                e.dataTransfer.setData("origin-id", `day-musico-${idx}`);
             });
+        });
+    } else {
+        vault.innerHTML = `<div class="empty-state">No hay músicos asignados en este bloque.</div>`;
+    }
 
-            musicosDelDiaActual = Array.from(setUnico, ([nombre, rol]) => ({ nombre, rol }));
+    // 📡 INYECCIÓN DE LÍNEAS TÉCNICAS EXTRAS (Al final del contenedor, a salvo del limpiado)
+    vault.insertAdjacentHTML('beforeend', `
+        <div style="margin-top: 20px; border-top: 1px solid #141923; padding-top: 15px; width: 100%;">
+            <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--ensancha-cyan); letter-spacing: 0.5px; margin-bottom: 10px;">Líneas Técnicas Extras</div>
+            
+            <div class="draggable-musician" draggable="true" id="extra-tb" data-nombre="Talkback" data-rol="talkback" style="margin-bottom: 8px;">
+                <span>Talkback (MC)</span>
+                <span class="musician-role" style="background: rgba(0, 255, 204, 0.1); color: var(--ensancha-cyan);">TB</span>
+            </div>
+            
+            <div class="draggable-musician" draggable="true" id="extra-seq" data-nombre="Secuencias" data-rol="secuencias">
+                <span>Secuencias (L/R)</span>
+                <span class="musician-role" style="background: rgba(255, 123, 0, 0.1); color: var(--ensancha-orange);">SEC</span>
+            </div>
+        </div>
+    `);
 
-            const ordenPrioridad = [
-                "vox1", "vox2", "vox3", "vox4", "vox5", "vox6", "vox7", "vox8",
-                "keys 1", "keys 2", "bajo", "guitarra", "batería", "bateria", "percu"
-            ];
+    // Habilitar el arrastre y envío de datos de las fichas extras
+    const tbEl = document.getElementById('extra-tb');
+    if (tbEl) {
+        tbEl.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData("text/plain", JSON.stringify({ nombre: "Talkback", rol: "talkback" }));
+            e.dataTransfer.setData("origin-id", "extra-tb");
+        });
+    }
 
-            musicosDelDiaActual.sort((a, b) => {
-                const rolA = (a.rol || "").toLowerCase().trim();
-                const rolB = (b.rol || "").toLowerCase().trim();
-                let indexA = ordenPrioridad.findIndex(p => rolA.includes(p));
-                let indexB = ordenPrioridad.findIndex(p => rolB.includes(p));
-                if (indexA === -1) indexA = 999;
-                if (indexB === -1) indexB = 999;
-                if (indexA !== indexB) return indexA - indexB;
-                return a.nombre.localeCompare(b.nombre);
-            });
+    const seqEl = document.getElementById('extra-seq');
+    if (seqEl) {
+        seqEl.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData("text/plain", JSON.stringify({ nombre: "Secuencias", rol: "secuencias" }));
+            e.dataTransfer.setData("origin-id", "extra-seq");
+        });
+    }
+}
 
-            if (musicosDelDiaActual.length === 0) {
-                vault.innerHTML = `<div class="empty-state">No hay músicos asignados en este bloque.</div>`;
-                return;
-            }
-
-            musicosDelDiaActual.forEach((m, idx) => {
-                vault.insertAdjacentHTML('beforeend', `
-                    <div class="draggable-musician" draggable="true" id="day-musico-${idx}" data-nombre="${m.nombre}" data-rol="${m.rol}">
-                        <span>${m.nombre}</span>
-                        <span class="musician-role">${m.rol}</span>
-                    </div>
-                `);
-
-                const itemEl = document.getElementById(`day-musico-${idx}`);
-                itemEl.addEventListener('dragstart', (e) => {
-                    e.dataTransfer.setData("text/plain", JSON.stringify({ nombre: m.nombre, rol: m.rol }));
-                    // 🌟 CONFIGURACIÓN DRAG: Transferir ID de la banca lateral
-                    e.dataTransfer.setData("origin-id", `day-musico-${idx}`);
-                });
-            });
+     function obtenerIconoInstrumento(rol, nombre) {
+    const r = (rol || "").toLowerCase().trim();
+    const n = (nombre || "").toLowerCase().trim();
+    
+    // 0️⃣ PRIORIDAD TÉCNICA: Líneas Extras del Altar
+    if (r === 'talkback' || n.includes('talkback')) {
+        // 🎤 CASO ESPECIAL: Si el Talkback pertenece a Che Alvizuris
+        if (n.includes("che") || n.includes("alvizuris")) {
+            return '<img src="che.png" alt="Che Alvizuris Talkback" style="width: 100%; height: auto; object-fit: contain;">';
         }
+        return '<img src="tb.png" alt="Talkback Mic" style="width: 100%; height: auto; object-fit: contain;">';
+    }
+    if (r === 'secuencias' || n.includes('secuencia')) {
+        return '<img src="secuencia.png" alt="Secuencias" style="width: 100%; height: auto; object-fit: contain;">';
+    }
 
-        // 🎛️ CONSTRUIR WORKSPACE COMPLETO
+    // 1️⃣ PRIORIDAD ABSOLUTA: Teclados Específicos e Imágenes
+    // 🎹 Teclado Principal: Nord (keys 1, piano 1, tecla 1, nord)
+    if (/keys\s*1|piano\s*1|tecla\s*1|nord/i.test(r)) {
+        // 🎹 CASOS ESPECIALES: Filtros por nombre para Teclado 1
+        if (/antony/i.test(n) || /antony\s*de\s*le[oó]n/i.test(n)) {
+            return '<img src="antonydeleon.png" alt="Antony de Leon Keyboard" style="width: 100%; height: auto; object-fit: contain;">';
+        }
+        else if (/tar[eé]/i.test(n)) {
+            return '<img src="tare.png" alt="Tare Keyboard" style="width: 100%; height: auto; object-fit: contain;">';
+        }
+        else if (n.includes("diego ruiz") || n.includes("diego")) {
+            return '<img src="diego.png" alt="Diego Ruiz Keyboard" style="width: 100%; height: auto; object-fit: contain;">';
+        }
+        else if (n.includes("brandon")) {
+            return '<img src="brandon.png" alt="Brandon Keyboard" style="width: 100%; height: auto; object-fit: contain;">';
+        }
+        return '<img src="nord.png" alt="Nord Keyboard" style="width: 100%; height: auto; object-fit: contain;">';
+    }
+
+    // 🎹 Teclado Secundario: Montage (keys 2, piano 2, tecla 2, monta)
+    if (/keys\s*2|piano\s*2|tecla\s*2, monta/i.test(r)) {
+        // 🎹 CASOS ESPECIALES: Filtros por nombre para Teclado 2
+        if (/antony/i.test(n) || /antony\s*de\s*le[oó]n/i.test(n)) {
+            return '<img src="antonydeleon.png" alt="Antony de Leon Keyboard" style="width: 100%; height: auto; object-fit: contain;">';
+        }
+        else if (/tar[eé]/i.test(n)) {
+            return '<img src="tare.png" alt="Tare Keyboard" style="width: 100%; height: auto; object-fit: contain;">';
+        }
+        else if (n.includes("diego ruiz") || n.includes("diego")) {
+            return '<img src="diego.png" alt="Diego Ruiz Keyboard" style="width: 100%; height: auto; object-fit: contain;">';
+        }
+        else if (n.includes("brandon")) {
+            return '<img src="brandon.png" alt="Brandon Keyboard" style="width: 100%; height: auto; object-fit: contain;">';
+        }
+        return '<img src="montage.png" alt="Yamaha Montage" style="width: 100%; height: auto; object-fit: contain;">';
+    }
+
+    // 🎹 Resto de Teclados, Pianos o Synths genéricos
+    if (/keys|piano|tecla|synth|pads|korg/i.test(r)) {
+        if (n.includes("brandon")) {
+            return '<img src="brandon.png" alt="Brandon Keyboard" style="width: 100%; height: auto; object-fit: contain;">';
+        }
+        return '<i class="fa-solid fa-piano"></i>';
+    }
+
+
+    // 2️⃣ SEGUNDA PRIORIDAD: Guitarras e imágenes personalizadas
+    // 🎸 Guitarra Eléctrica Especializada: Suhr (guitarra eléctrica, electric guitar, eg)
+    if (/guitarra\s*el[eé]ctrica|electric\s*guitar|\beg\b/i.test(r)) {
+        // 🎸 CASO ESPECIAL: Si el guitarrista es Carlos Escobar
+        if (n.includes("carlos escobar")) {
+            return '<img src="carlose.png" alt="Carlos Escobar Guitar" style="width: 100%; height: auto; object-fit: contain;">';
+        }
+        // 🎸 CASO ESPECIAL: Si el guitarrista es Andrés Pérez (Detecta con o sin tildes)
+        else if (/andr[eé]s\s*p[eé]rez/i.test(n) || n.includes("andres") || n.includes("andrés")) {
+            return '<img src="andresperez.png" alt="Andres Perez Guitar" style="width: 100%; height: auto; object-fit: contain;">';
+        }
+        // Imagen estándar para el resto de guitarras eléctricas
+        return '<img src="suhr.png" alt="Suhr Guitar" style="width: 100%; height: auto; object-fit: contain;">';
+    }
+
+    if (/vox|vos|voz|cantante|coro|vocal|lead/i.test(r)) {
+        // 🎤 CASO ESPECIAL 1: Matamba
+        if (n.includes("matamba")) {
+            return '<img src="matamba.png" alt="Matamba Vox" style="width: 100%; height: auto; object-fit: contain;">';
+        }
+        // 🎤 CASO ESPECIAL 2: Meme
+        else if (n.includes("meme")) {
+            return '<img src="meme.png" alt="Meme Vox" style="width: 100%; height: auto; object-fit: contain;">';
+        }
+        // 🎤 CASO ESPECIAL 3: Nicole
+        else if (n.includes("nicole")) {
+            return '<img src="nicole.png" alt="Nicole Vox" style="width: 100%; height: auto; object-fit: contain;">';
+        }
+        // 🎤 CASO ESPECIAL 4: Dug
+        else if (n.includes("dug")) {
+            return '<img src="dug.png" alt="Dug Vox" style="width: 100%; height: auto; object-fit: contain;">';
+        }
+        // 🎤 CASO ESPECIAL 5: Sergio
+        else if (n.includes("sergio")) {
+            return '<img src="sergio.png" alt="Sergio Vox" style="width: 100%; height: auto; object-fit: contain;">';
+        }
+        // 🎤 CASO ESPECIAL 6: Sofía Paniagua (¡VA PRIMERO POR SER MÁS ESPECÍFICO!)
+        else if (n.includes("sofia paniagua") || n.includes("sofía paniagua") || n.includes("sofip")) {
+            return '<img src="sofip.png" alt="Sofia Paniagua Vox" style="width: 100%; height: auto; object-fit: contain;">';
+        }
+        // 🎤 CASO ESPECIAL 7: Sofi Oscal (Si no fue Paniagua, entra aquí)
+        else if (n.includes("sofi") || n.includes("sifi") || n.includes("oscal")) {
+            return '<img src="sofi.png" alt="Sofi Oscal Vox" style="width: 100%; height: auto; object-fit: contain;">';
+        }
+        // 🎤 CASO ESPECIAL 8: Ludim
+        else if (n.includes("ludim")) {
+            return '<img src="ludim.png" alt="Ludim Vox" style="width: 100%; height: auto; object-fit: contain;">';
+        }
+        // 🎤 CASO ESPECIAL 9: Tere Quevedo Vocal (Reconoce el apellido completo o variaciones básicas)
+        else if (n.includes("tere quevedo") || n.includes("tere") || /tar[eé]/i.test(n)) {
+            return '<img src="tere.png" alt="Tere Quevedo Vox" style="width: 100%; height: auto; object-fit: contain;">';
+        }
+        // Icono general para las demás voces
+        return '<i class="fa-solid fa-microphone-lines"></i>';
+    }
+    
+    // 🎸 Bajos y filtros por Nombre Especial
+    if (/bajo|bass/i.test(r)) {
+        // 🎸 CASO ESPECIAL: Si el bajo se llama Keily
+        if (n.includes("keily")) {
+            return '<img src="keily.png" alt="Keily Bass" style="width: 100%; height: auto; object-fit: contain;">';
+        }
+        // 🎸 CASO ESPECIAL: Si el bajo se llama Abel
+        else if (n.includes("abel")) {
+            return '<img src="abel.png" alt="Abel Bass" style="width: 100%; height: auto; object-fit: contain;">';
+        }
+        // 🎸 CASO ESPECIAL: Si el bajo es Saúl Ortiz (Detecta con o sin tilde)
+        else if (/sa[uú]l\s*ortiz/i.test(n) || n.includes("saul") || n.includes("saúl")) {
+            return '<img src="saul.png" alt="Saul Ortiz Bass" style="width: 100%; height: auto; object-fit: contain;">';
+        }
+        // Icono general para los demás bajistas
+        return '<i class="fa-solid fa-guitar" style="color: #00a0ff;"></i>';
+    }
+    
+    // Resto de Guitarras (Acústicas o genéricas que no sean EG)
+    if (/guit|gtr|guitar/i.test(r)) {
+        return '<i class="fa-solid fa-guitar"></i>';
+    }
+    
+    // 🥁 Batería y filtros por Nombre Especial
+    if (/bat|drums|batería|bateria|kick/i.test(r)) {
+        // 🥁 CASO ESPECIAL: Si el baterista se llama Ovejero
+        if (n.includes("ovejero")) {
+            return '<img src="ovejero.png" alt="Ovejero Drums" style="width: 100%; height: auto; object-fit: contain;">';
+        }
+        // 🥁 CASO ESPECIAL: Si el baterista se llama Sebas o Sebas López (Detecta con o sin tildes)
+        else if (/sebas|seb[aá]s\s*l[oó]pez/i.test(n)) {
+            return '<img src="sebasd.png" alt="Sebas Lopez Drums" style="width: 100%; height: auto; object-fit: contain;">';
+        }
+        // Icono general para los demás bateristas
+        return '<i class="fa-solid fa-drum"></i>';
+    }
+    
+    // 🪘 Percusiones, Pads de efectos u Octapads
+    if (/percu|spd|pad|octapad|shaker|bongos/i.test(r)) {
+        // 🪘 CASO ESPECIAL: Si el percusionista se llama Santiago
+        if (n.includes("santiago")) {
+            return '<img src="santiago.png" alt="Santiago Percussion" style="width: 100%; height: auto; object-fit: contain;">';
+        }
+        // Icono general para los demás percusionistas
+        return '<i class="fa-solid fa-drum-steelpan"></i>';
+    }
+    
+    // 🎧 Directores Musicales, Directores Técnicos o Talkbacks
+    if (/md|director|lead|pastor/i.test(r)) {
+        // 🎧 CASO ESPECIAL: Si el director/MD es Andrés Pérez
+        if (/andr[eé]s\s*p[eé]rez/i.test(n) || n.includes("andres") || n.includes("andrés")) {
+            return '<img src="andresperez.png" alt="Andres Perez MD" style="width: 100%; height: auto; object-fit: contain;">';
+        }
+        // Icono general para otros directores/MD
+        return '<i class="fa-solid fa-headset"></i>';
+    }
+    
+    // Icono por defecto si el rol es genérico
+    return '<i class="fa-solid fa-music"></i>';
+}
+
         window.renderAudioWorkspace = function() {
             let labelTitulo = currentDay.toUpperCase().replace('_', ' ');
             document.getElementById('audio-block-title').innerText = `Bloque Activo: ${labelTitulo}`;
@@ -324,7 +726,6 @@
             stageplotGuardado.forEach(nodo => {
                 inyectarMusicoAlEscenarioCanvas(canvas, nodo.nombre, nodo.rol, nodo.posX, nodo.posY);
                 
-                // 🌟 AL CARGAR: Si el músico ya está en el mapa, ocultarlo de la banca lateral
                 document.querySelectorAll('.draggable-musician').forEach(el => {
                     if (el.getAttribute('data-nombre') === nodo.nombre) {
                         el.style.display = 'none';
@@ -352,7 +753,7 @@
                         <option value="Conexión XLR Directa" ${data.conexion === 'Conexión XLR Directa' ? 'selected' : ''}>Conexión XLR Directa</option>
                     </select>
                 </td>
-                <td><input type="text" class="inp-notas-ch" placeholder="Monitoreo, EQ, notas..." value="${data.notas}"></td>
+                <td><input type="text" class="inp-notas-ch" placeholder="Monitoreo, EQ, notas..." value="${data.notes || data.notas || ''}"></td>
             `;
 
             tbody.appendChild(tr);
@@ -388,7 +789,6 @@
             });
 
             if(!duplicado) {
-                // 🌟 CONFIGURACIÓN DROP: Ocultar el elemento original de la lista izquierda
                 const originId = e.dataTransfer.getData("origin-id");
                 if (originId) {
                     const originEl = document.getElementById(originId);
@@ -409,9 +809,12 @@
             div.style.top = `${y}%`;
             div.setAttribute('data-fullname', nombre);
 
+            const iconoHTML = obtenerIconoInstrumento(rol, nombre);
+
             div.innerHTML = `
                 <button class="btn-remove-node" id="btn-del-${idNodo}">✕</button>
-                <strong>${nombre}</strong>
+                <div class="instrument-icon-container">${iconoHTML}</div>
+                <strong onclick="abrirHojaEspecificaciones('${nombre}', '${rol}')">${nombre}</strong>
                 <span>${rol}</span>
                 <div class="musician-tag-container"></div>
             `;
@@ -421,7 +824,6 @@
             document.getElementById(`btn-del-${idNodo}`).onclick = (e) => {
                 e.stopPropagation();
                 
-                // 🌟 AL QUITAR: Mostrar al músico de nuevo en la banca izquierda
                 document.querySelectorAll('.draggable-musician').forEach(el => {
                     if (el.getAttribute('data-nombre') === nombre) {
                         el.style.display = 'flex';
@@ -433,6 +835,9 @@
             };
 
             div.onmousedown = function(event) {
+                // Si el clic fue en el tag strong, evitamos iniciar el arrastre para que abra la modal limpiamente
+                if (event.target.tagName === 'STRONG') return;
+                
                 event.stopPropagation();
                 let shiftX = event.clientX - div.getBoundingClientRect().left;
                 let shiftY = event.clientY - div.getBoundingClientRect().top;
@@ -458,34 +863,63 @@
         }
 
         window.sincronizarEtiquetasStageplot = function() {
-            const mapaMusicoCanales = {};
+    // 🧼 LIMPIEZA TOTAL: Vaciamos el contenedor para que NUNCA se pinten las etiquetas en el Stage Plot
+    document.querySelectorAll('.placed-musician').forEach(tarjeta => {
+        const contenedorTags = tarjeta.querySelector('.musician-tag-container');
+        if (contenedorTags) {
+            contenedorTags.innerHTML = ''; 
+        }
+    });
+}
 
+        // 📡 SISTEMA DE VENTANA MODAL PARA REVISAR RUTEOS DEL MÚSICO IN SITU
+        window.abrirHojaEspecificaciones = function(nombre, rol) {
+            document.getElementById('modalNombreMusico').innerText = nombre;
+            document.getElementById('modalRolMusico').innerText = rol;
+
+            // Renderizar el mismo avatar/icono que usa en el Stage Plot
+            const contenedorAvatar = document.getElementById('modalAvatar');
+            contenedorAvatar.innerHTML = obtenerIconoInstrumento(rol, nombre);
+
+            const tbodyModal = document.getElementById('modalCanalesBody');
+            tbodyModal.innerHTML = '';
+
+            let canalesEncontrados = 0;
+
+            // Escanear la tabla del Input List del Altar buscando coincidencias en vivo
             document.querySelectorAll('.channel-row-item').forEach(row => {
                 const ch = row.querySelector('.ch-number').innerText;
-                const musico = row.querySelector('.sel-musico-ch').value;
+                const musicoAsignado = row.querySelector('.sel-musico-ch').value;
                 const instrumento = row.querySelector('.inp-inst-ch').value.trim();
+                const conexion = row.querySelector('.sel-con-ch').value;
 
-                if (musico) {
-                    if (!mapaMusicoCanales[musico]) mapaMusicoCanales[musico] = [];
-                    mapaMusicoCanales[musico].push({ ch: ch, linea: instrumento || "Línea Activa" });
+                if (musicoAsignado === nombre) {
+                    canalesEncontrados++;
+                    tbodyModal.insertAdjacentHTML('beforeend', `
+                        <tr>
+                            <td style="text-align: center;" class="modal-ch-badge">CH ${ch}</td>
+                            <td>${instrumento || "Línea Activa / Instrumento"}</td>
+                            <td>${conexion}</td>
+                        </tr>
+                    `);
                 }
             });
 
-            document.querySelectorAll('.placed-musician').forEach(tarjeta => {
-                const nombreCompleto = tarjeta.getAttribute('data-fullname');
-                const contenedorTags = tarjeta.querySelector('.musician-tag-container');
-                contenedorTags.innerHTML = '';
+            if (canalesEncontrados === 0) {
+                tbodyModal.innerHTML = `<tr><td colspan="3" class="empty-state">Este músico no tiene canales asignados en el Input List.</td></tr>`;
+            }
 
-                const ruteos = mapaMusicoCanales[nombreCompleto];
-                if (ruteos) {
-                    ruteos.forEach(r => {
-                        contenedorTags.insertAdjacentHTML('beforeend', `
-                            <div class="mini-audio-tag">CH ${r.ch}: ${r.linea}</div>
-                        `);
-                    });
-                }
-            });
+            document.getElementById('musicianModal').classList.add('active');
         }
+
+        window.cerrarHojaEspecificaciones = function() {
+            document.getElementById('musicianModal').classList.remove('active');
+        }
+
+        // Permitir cerrar el modal cómodamente con la tecla ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === "Escape") cerrarHojaEspecificaciones();
+        });
 
         window.saveAudioConfigDay = async function() {
             const stageNodes = [];
@@ -504,7 +938,7 @@
                     musico: row.querySelector('.sel-musico-ch').value,
                     instrumento: row.querySelector('.inp-inst-ch').value,
                     conexion: row.querySelector('.sel-con-ch').value,
-                    notas: row.querySelector('.inp-notas-ch').value
+                    notes: row.querySelector('.inp-notas-ch').value
                 });
             });
 
@@ -526,6 +960,18 @@
         }
 
         loadAudioConfigInicial();
+
+        window.ajustarTamanoEnVivo = function(valor) {
+    // 1. Aplica el tamaño en tiempo real
+    document.documentElement.style.setProperty('--zoom-instrumento', valor + 'px');
+    // 2. Modifica el valor visual del slider (por si acaso)
+    document.getElementById('sizeSlider').value = valor;
+    // 3. 💾 Guarda la preferencia en el navegador
+    localStorage.setItem('stageplotZoom', valor);
+}
+        
+ const tamanoGuardado = localStorage.getItem('stageplotZoom') || 70;
+ajustarTamanoEnVivo(tamanoGuardado);
     </script>
 </body>
 </html>
