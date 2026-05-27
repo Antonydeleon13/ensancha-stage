@@ -543,7 +543,7 @@
     }
 }
 
-    function obtenerIconoInstrumento(rol, nombre) {
+   function obtenerIconoInstrumento(rol, nombre) {
     const r = (rol || "").toLowerCase().trim();
     const n = (nombre || "").toLowerCase().trim();
     
@@ -616,6 +616,10 @@
         else if (/andr[eé]s\s*p[eé]rez/i.test(n) || n.includes("andres") || n.includes("andrés")) {
             return '<img src="andresperez.png" alt="Andres Perez Guitar" style="width: 100%; height: auto; object-fit: contain;">';
         }
+        // 🎸 CASO ESPECIAL: Si el guitarrista es Luis Guerra ⬅️ ¡NUEVO ELEMENTO AGREGADO!
+        else if (/luis/i.test(n)) {
+            return '<img src="luis.png" alt="Luis Guerra Guitar" style="width: 100%; height: auto; object-fit: contain;">';
+        }
         // Imagen estándar para el resto de guitarras eléctricas
         return '<img src="suhr.png" alt="Suhr Guitar" style="width: 100%; height: auto; object-fit: contain;">';
     }
@@ -685,9 +689,13 @@
         else if (n.includes("chino")) {
             return '<img src="chino.png" alt="Chino Vox" style="width: 100%; height: auto; object-fit: contain;">';
         }
-        // 🎤 CASO ESPECIAL 17: Cami ⬅️ ¡NUEVO ELEMENTO AGREGADA!
+        // 🎤 CASO ESPECIAL 17: Cami
         else if (n.includes("cami")) {
             return '<img src="cami.png" alt="Cami Vox" style="width: 100%; height: auto; object-fit: contain;">';
+        }
+        // 🎤 CASO ESPECIAL 18: Chepe
+        else if (n.includes("chepe")) {
+            return '<img src="chepe.png" alt="Chepe Vox" style="width: 100%; height: auto; object-fit: contain;">';
         }
         // Icono general para las demás voces
         return '<i class="fa-solid fa-microphone-lines"></i>';
