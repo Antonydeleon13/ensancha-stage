@@ -669,9 +669,17 @@
         else if (n.includes("tephi")) {
             return '<img src="tephi.png" alt="Tephi Vox" style="width: 100%; height: auto; object-fit: contain;">';
         }
-        // 🎤 CASO ESPECIAL 13: Priscila ⬅️ ¡NUEVA EXCEPCIÓN AGREGADA!
+        // 🎤 CASO ESPECIAL 13: Priscila
         else if (n.includes("priscila")) {
             return '<img src="priscila.png" alt="Priscila Vox" style="width: 100%; height: auto; object-fit: contain;">';
+        }
+        // 🎤 CASO ESPECIAL 14: Michi Reyes
+        else if (n.includes("michi reyes") || n.includes("michi")) {
+            return '<img src="michi.png" alt="Michi Reyes Vox" style="width: 100%; height: auto; object-fit: contain;">';
+        }
+        // 🎤 CASO ESPECIAL 15: Male / Malee ⬅️ ¡NUEVO ELEMENTO AGREGADO!
+        else if (/male|malee/i.test(n)) {
+            return '<img src="male.png" alt="Male Vox" style="width: 100%; height: auto; object-fit: contain;">';
         }
         // Icono general para las demás voces
         return '<i class="fa-solid fa-microphone-lines"></i>';
