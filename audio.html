@@ -1091,8 +1091,10 @@
     localStorage.setItem('stageplotZoom', valor);
 }
         
- const tamanoGuardado = localStorage.getItem('stageplotZoom') || 70;
-ajustarTamanoEnVivo(tamanoGuardado);
+ document.addEventListener('DOMContentLoaded', () => {
+    const tamanoGuardado = localStorage.getItem('stageplotZoom') || 70;
+    ajustarTamanoEnVivo(tamanoGuardado);
+});
     </script>
 </body>
 </html>
