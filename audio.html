@@ -1083,18 +1083,24 @@
         loadAudioConfigInicial();
 
         window.ajustarTamanoEnVivo = function(valor) {
-    // 1. Aplica el tamaño en tiempo real
-    document.documentElement.style.setProperty('--zoom-instrumento', valor + 'px');
-    // 2. Modifica el valor visual del slider (por si acaso)
-    document.getElementById('sizeSlider').value = valor;
-    // 3. 💾 Guarda la preferencia en el navegador
-    localStorage.setItem('stageplotZoom', valor);
-}
+            // 1. Aplica el tamaño general en tiempo real
+            document.documentElement.style.setProperty('--zoom-instrumento', valor + 'px');
+            
+            // 2. 🛡️ Validación de seguridad: Modifica el slider SOLO si existe en el HTML
+            const sliderEl = document.getElementById('sizeSlider');
+            if (sliderEl) {
+                sliderEl.value = valor;
+            }
+            
+            // 3. 💾 Guarda la preferencia en el navegador
+            localStorage.setItem('stageplotZoom', valor);
+        }
         
- document.addEventListener('DOMContentLoaded', () => {
-    const tamanoGuardado = localStorage.getItem('stageplotZoom') || 70;
-    ajustarTamanoEnVivo(tamanoGuardado);
-});
+        // ⏳ Ejecutamos de forma segura esperando a que el HTML esté construido
+        document.addEventListener('DOMContentLoaded', () => {
+            const tamanoGuardado = localStorage.getItem('stageplotZoom') || 70;
+            ajustarTamanoEnVivo(tamanoGuardado);
+        });
     </script>
 </body>
 </html>
