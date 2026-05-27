@@ -88,7 +88,7 @@
         }
         
         .stage-canvas::before {
-            content: "LÍNEA TRASERA (BATERÍA / SECUENCIAS / RACKS)";
+            content: "LÍNEA TRASERA (PANTALLAS, RACKS)";
             position: absolute; top: 1rem; left: 50%; transform: translateX(-50%);
             font-size: 0.65rem; color: rgba(0, 0, 0, 0.35); font-weight: 800; letter-spacing: 0.15em; white-space: nowrap;
             z-index: 1;
@@ -282,6 +282,37 @@
         .modal-table th { background: #0d111a; color: var(--text-muted); font-weight: 700; padding: 10px; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #141923; }
         .modal-table td { padding: 10px; border-bottom: 1px solid #141923; color: #e2e8f0; }
         .modal-ch-badge { font-family: 'JetBrains Mono', monospace; font-weight: 800; color: var(--ensancha-green); }
+
+        /* 🎛️ MENÚ DE CONTROL DE TAMAÑO INDIVIDUAL */
+.individual-zoom-menu {
+    position: fixed;
+    background: #0f172a;
+    border: 1px solid var(--ensancha-blue);
+    border-radius: 8px;
+    padding: 10px 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    z-index: 2500;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 11px;
+    color: #fff;
+    font-weight: 700;
+}
+
+.individual-zoom-menu input[type="range"] {
+    width: 100px;
+    accent-color: var(--ensancha-cyan);
+    cursor: pointer;
+}
+
+.individual-zoom-menu span {
+    color: var(--text-muted);
+    font-size: 9px;
+    text-transform: uppercase;
+}
+
+
     </style>
 </head>
 <body>
@@ -305,10 +336,7 @@
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
         <h3 id="audio-block-title" style="font-size: 15px; color: var(--ensancha-yellow); text-transform: uppercase; letter-spacing: 1.5px; margin: 0;">Día Activo: JUEVES</h3>
         
-        <div class="stage-zoom-control" draggable="false" onmousedown="event.stopPropagation();" style="display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.03); padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-window);">
-            <label for="sizeSlider" style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Tamaño:</label>
-            <input type="range" id="sizeSlider" min="40" max="120" value="70" oninput="ajustarTamanoEnVivo(this.value)" style="accent-color: var(--ensancha-cyan); width: 90px; cursor: pointer;">
-        </div>
+        
     </div>
 
     <div class="grid-audio">
@@ -515,7 +543,7 @@
     }
 }
 
-     function obtenerIconoInstrumento(rol, nombre) {
+    function obtenerIconoInstrumento(rol, nombre) {
     const r = (rol || "").toLowerCase().trim();
     const n = (nombre || "").toLowerCase().trim();
     
@@ -578,7 +606,7 @@
 
 
     // 2️⃣ SEGUNDA PRIORIDAD: Guitarras e imágenes personalizadas
-    // 🎸 Guitarra Eléctrica Especializada: Suhr (guitarra eléctrica, electric guitar, eg)
+    // 🎸 Guitarra Eléctrica Specialized: Suhr (guitarra eléctrica, electric guitar, eg)
     if (/guitarra\s*el[eé]ctrica|electric\s*guitar|\beg\b/i.test(r)) {
         // 🎸 CASO ESPECIAL: Si el guitarrista es Carlos Escobar
         if (n.includes("carlos escobar")) {
@@ -613,11 +641,11 @@
         else if (n.includes("sergio")) {
             return '<img src="sergio.png" alt="Sergio Vox" style="width: 100%; height: auto; object-fit: contain;">';
         }
-        // 🎤 CASO ESPECIAL 6: Sofía Paniagua (¡VA PRIMERO POR SER MÁS ESPECÍFICO!)
+        // 🎤 CASO ESPECIAL 6: Sofía Paniagua
         else if (n.includes("sofia paniagua") || n.includes("sofía paniagua") || n.includes("sofip")) {
             return '<img src="sofip.png" alt="Sofia Paniagua Vox" style="width: 100%; height: auto; object-fit: contain;">';
         }
-        // 🎤 CASO ESPECIAL 7: Sofi Oscal (Si no fue Paniagua, entra aquí)
+        // 🎤 CASO ESPECIAL 7: Sofi Oscal
         else if (n.includes("sofi") || n.includes("sifi") || n.includes("oscal")) {
             return '<img src="sofi.png" alt="Sofi Oscal Vox" style="width: 100%; height: auto; object-fit: contain;">';
         }
@@ -625,13 +653,25 @@
         else if (n.includes("ludim")) {
             return '<img src="ludim.png" alt="Ludim Vox" style="width: 100%; height: auto; object-fit: contain;">';
         }
-        // 🎤 CASO ESPECIAL 9: Pao Chavarría
+        // 🎤 CASO ESPECIAL 9: Tere Quevedo Vocal
+        else if (n.includes("tere quevedo") || n.includes("tere") || /tar[eé]/i.test(n)) {
+            return '<img src="tere.png" alt="Tere Quevedo Vox" style="width: 100%; height: auto; object-fit: contain;">';
+        }
+        // 🎤 CASO ESPECIAL 10: Pao Chavarría
         else if (n.includes("pao chavarria") || n.includes("pao chavarría") || n.includes("pao")) {
             return '<img src="pao.png" alt="Pao Chavarria Vox" style="width: 100%; height: auto; object-fit: contain;">';
         }
-        // 🎤 CASO ESPECIAL 10: Tere Quevedo Vocal
-        else if (n.includes("tere quevedo") || n.includes("tere") || /tar[eé]/i.test(n)) {
-            return '<img src="tere.png" alt="Tere Quevedo Vox" style="width: 100%; height: auto; object-fit: contain;">';
+        // 🎤 CASO ESPECIAL 11: Ander
+        else if (n.includes("ander")) {
+            return '<img src="ander.png" alt="Ander Vox" style="width: 100%; height: auto; object-fit: contain;">';
+        }
+        // 🎤 CASO ESPECIAL 12: Tephi
+        else if (n.includes("tephi")) {
+            return '<img src="tephi.png" alt="Tephi Vox" style="width: 100%; height: auto; object-fit: contain;">';
+        }
+        // 🎤 CASO ESPECIAL 13: Priscila ⬅️ ¡NUEVA EXCEPCIÓN AGREGADA!
+        else if (n.includes("priscila")) {
+            return '<img src="priscila.png" alt="Priscila Vox" style="width: 100%; height: auto; object-fit: contain;">';
         }
         // Icono general para las demás voces
         return '<i class="fa-solid fa-microphone-lines"></i>';
@@ -728,7 +768,7 @@
             canvas.innerHTML = '';
 
             stageplotGuardado.forEach(nodo => {
-                inyectarMusicoAlEscenarioCanvas(canvas, nodo.nombre, nodo.rol, nodo.posX, nodo.posY);
+    inyectarMusicoAlEscenarioCanvas(canvas, nodo.nombre, nodo.rol, nodo.posX, nodo.posY, nodo.zoomIndividual);
                 
                 document.querySelectorAll('.draggable-musician').forEach(el => {
                     if (el.getAttribute('data-nombre') === nodo.nombre) {
@@ -804,67 +844,119 @@
             }
         });
 
-        function inyectarMusicoAlEscenarioCanvas(canvas, nombre, rol, x, y) {
-            const idNodo = 'node-' + Math.random().toString(36).substring(2, 9);
-            const div = document.createElement('div');
-            div.className = 'placed-musician';
-            div.id = idNodo;
-            div.style.left = `${x}%`;
-            div.style.top = `${y}%`;
-            div.setAttribute('data-fullname', nombre);
+        function inyectarMusicoAlEscenarioCanvas(canvas, nombre, rol, x, y, zoomIndividual) {
+    const idNodo = 'node-' + Math.random().toString(36).substring(2, 9);
+    const div = document.createElement('div');
+    div.className = 'placed-musician';
+    div.id = idNodo;
+    div.style.left = `${x}%`;
+    div.style.top = `${y}%`;
+    
+    // 🎛️ Definimos el tamaño individual (usa el guardado o el valor base de 70px)
+    const currentZoom = zoomIndividual || 70;
+    div.style.setProperty('--zoom-individual', `${currentZoom}px`);
+    div.setAttribute('data-fullname', nombre);
 
-            const iconoHTML = obtenerIconoInstrumento(rol, nombre);
+    const iconoHTML = obtenerIconoInstrumento(rol, nombre);
 
-            div.innerHTML = `
-                <button class="btn-remove-node" id="btn-del-${idNodo}">✕</button>
-                <div class="instrument-icon-container">${iconoHTML}</div>
-                <strong onclick="abrirHojaEspecificaciones('${nombre}', '${rol}')">${nombre}</strong>
-                <span>${rol}</span>
-                <div class="musician-tag-container"></div>
-            `;
+    // Modificamos los estilos inline del contenedor del icono para que use el zoom individual prioritariamente
+    div.innerHTML = `
+        <button class="btn-remove-node" id="btn-del-${idNodo}">✕</button>
+        <div class="instrument-icon-container" style="width: var(--zoom-individual, var(--zoom-instrumento)) !important; height: var(--zoom-individual, var(--zoom-instrumento)) !important; min-height: var(--zoom-individual, var(--zoom-instrumento)) !important; font-size: calc(var(--zoom-individual, var(--zoom-instrumento)) * 0.5) !important;">
+            ${iconoHTML}
+        </div>
+        <strong onclick="abrirHojaEspecificaciones('${nombre}', '${rol}')">${nombre}</strong>
+        <span>${rol}</span>
+        <div class="musician-tag-container"></div>
+    `;
 
-            canvas.appendChild(div);
+    canvas.appendChild(div);
 
-            document.getElementById(`btn-del-${idNodo}`).onclick = (e) => {
-                e.stopPropagation();
-                
-                document.querySelectorAll('.draggable-musician').forEach(el => {
-                    if (el.getAttribute('data-nombre') === nombre) {
-                        el.style.display = 'flex';
-                    }
-                });
+    // 🎛️ EVENTO CLICK DERECHO (CONTEXT MENU): Abre el control flotante del muñeco
+    div.addEventListener('contextmenu', (e) => {
+        e.preventDefault(); // Bloquea el menú por defecto del navegador
+        e.stopPropagation();
 
-                div.remove();
-                sincronizarEtiquetasStageplot();
-            };
+        // Si ya hay un menú flotante abierto en pantalla, lo borramos para no acumularlos
+        const menuViejo = document.getElementById('active-zoom-menu');
+        if (menuViejo) menuViejo.remove();
 
-            div.onmousedown = function(event) {
-                // Si el clic fue en el tag strong, evitamos iniciar el arrastre para que abra la modal limpiamente
-                if (event.target.tagName === 'STRONG') return;
-                
-                event.stopPropagation();
-                let shiftX = event.clientX - div.getBoundingClientRect().left;
-                let shiftY = event.clientY - div.getBoundingClientRect().top;
+        // Creamos el contenedor del slider flotante
+        const menu = document.createElement('div');
+        menu.id = 'active-zoom-menu';
+        menu.className = 'individual-zoom-menu';
+        menu.style.left = `${e.clientX}px`;
+        menu.style.top = `${e.clientY}px`;
 
-                function moveAt(clientX, clientY) {
-                    let canvasRect = canvas.getBoundingClientRect();
-                    let newX = ((clientX - canvasRect.left - shiftX) / canvasRect.width) * 100;
-                    let newY = ((clientY - canvasRect.top - shiftY) / canvasRect.height) * 100;
-                    
-                    if(newX >= 0 && newX <= 85) div.style.left = newX + '%';
-                    if(newY >= 0 && newY <= 88) div.style.top = newY + '%';
-                }
+        const savedZoomVal = parseInt(div.style.getPropertyValue('--zoom-individual')) || 70;
 
-                function onMouseMove(e) { moveAt(e.clientX, e.clientY); }
-                document.addEventListener('mousemove', onMouseMove);
-                
-                document.onmouseup = function() {
-                    document.removeEventListener('mousemove', onMouseMove);
-                    document.onmouseup = null;
-                };
-            };
-            div.ondragstart = () => false;
+        menu.innerHTML = `
+            <span>Tamaño Individual</span>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <input type="range" min="40" max="150" value="${savedZoomVal}" id="slider-${idNodo}">
+                <span id="val-${idNodo}">${savedZoomVal}px</span>
+            </div>
+        `;
+
+        document.body.appendChild(menu);
+
+        const slider = document.getElementById(`slider-${idNodo}`);
+        
+        // Escuchamos el movimiento del slider en vivo
+        slider.addEventListener('input', (evt) => {
+            const newVal = evt.target.value;
+            div.style.setProperty('--zoom-individual', `${newVal}px`);
+            document.getElementById(`val-${idNodo}`).innerText = `${newVal}px`;
+        });
+
+        // Evento para destruir el menú flotante al hacer clic en cualquier otra parte de la pantalla
+        const cerrarMenu = () => {
+            menu.remove();
+            document.removeEventListener('click', cerrarMenu);
+        };
+        setTimeout(() => document.addEventListener('click', cerrarMenu), 10);
+    });
+
+    document.getElementById(`btn-del-${idNodo}`).onclick = (e) => {
+        e.stopPropagation();
+        
+        document.querySelectorAll('.draggable-musician').forEach(el => {
+            if (el.getAttribute('data-nombre') === nombre) {
+                el.style.display = 'flex';
+            }
+        });
+
+        div.remove();
+        sincronizarEtiquetasStageplot();
+    };
+
+    div.onmousedown = function(event) {
+        // Si el clic fue en el tag strong o en el slider, evitamos el arrastre
+        if (event.target.tagName === 'STRONG' || event.target.tagName === 'INPUT') return;
+        
+        event.stopPropagation();
+        let shiftX = event.clientX - div.getBoundingClientRect().left;
+        let shiftY = event.clientY - div.getBoundingClientRect().top;
+
+        function moveAt(clientX, clientY) {
+            let canvasRect = canvas.getBoundingClientRect();
+            let newX = ((clientX - canvasRect.left - shiftX) / canvasRect.width) * 100;
+            let newY = ((clientY - canvasRect.top - shiftY) / canvasRect.height) * 100;
+            
+            if(newX >= 0 && newX <= 85) div.style.left = newX + '%';
+            if(newY >= 0 && newY <= 88) div.style.top = newY + '%';
         }
+
+        function onMouseMove(e) { moveAt(e.clientX, e.clientY); }
+        document.addEventListener('mousemove', onMouseMove);
+        
+        document.onmouseup = function() {
+            document.removeEventListener('mousemove', onMouseMove);
+            document.onmouseup = null;
+        };
+    };
+    div.ondragstart = () => false;
+}
 
         window.sincronizarEtiquetasStageplot = function() {
     // 🧼 LIMPIEZA TOTAL: Vaciamos el contenedor para que NUNCA se pinten las etiquetas en el Stage Plot
@@ -928,13 +1020,14 @@
         window.saveAudioConfigDay = async function() {
             const stageNodes = [];
             document.querySelectorAll('.placed-musician').forEach(div => {
-                stageNodes.push({
-                    nombre: div.getAttribute('data-fullname'),
-                    rol: div.querySelector('span').innerText,
-                    posX: parseFloat(div.style.left),
-                    posY: parseFloat(div.style.top)
-                });
-            });
+    stageNodes.push({
+        nombre: div.getAttribute('data-fullname'),
+        rol: div.querySelector('span').innerText,
+        posX: parseFloat(div.style.left),
+        posY: parseFloat(div.style.top),
+        zoomIndividual: parseInt(div.style.getPropertyValue('--zoom-individual')) || 70 // ⬅️ Guardamos su tamaño
+    });
+});
 
             const inputListData = [];
             document.querySelectorAll('.channel-row-item').forEach(row => {
