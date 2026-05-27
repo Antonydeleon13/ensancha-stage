@@ -551,7 +551,7 @@
     }
 
     // 🎹 Teclado Secundario: Montage (keys 2, piano 2, tecla 2, monta)
-    if (/keys\s*2|piano\s*2|tecla\s*2, monta/i.test(r)) {
+    if (/keys\s*2|piano\s*2|tecla\s*2|monta/i.test(r)) {
         // 🎹 CASOS ESPECIALES: Filtros por nombre para Teclado 2
         if (/antony/i.test(n) || /antony\s*de\s*le[oó]n/i.test(n)) {
             return '<img src="antonydeleon.png" alt="Antony de Leon Keyboard" style="width: 100%; height: auto; object-fit: contain;">';
@@ -625,7 +625,11 @@
         else if (n.includes("ludim")) {
             return '<img src="ludim.png" alt="Ludim Vox" style="width: 100%; height: auto; object-fit: contain;">';
         }
-        // 🎤 CASO ESPECIAL 9: Tere Quevedo Vocal (Reconoce el apellido completo o variaciones básicas)
+        // 🎤 CASO ESPECIAL 9: Pao Chavarría
+        else if (n.includes("pao chavarria") || n.includes("pao chavarría") || n.includes("pao")) {
+            return '<img src="pao.png" alt="Pao Chavarria Vox" style="width: 100%; height: auto; object-fit: contain;">';
+        }
+        // 🎤 CASO ESPECIAL 10: Tere Quevedo Vocal
         else if (n.includes("tere quevedo") || n.includes("tere") || /tar[eé]/i.test(n)) {
             return '<img src="tere.png" alt="Tere Quevedo Vox" style="width: 100%; height: auto; object-fit: contain;">';
         }
