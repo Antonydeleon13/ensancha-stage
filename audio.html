@@ -325,10 +325,41 @@
     text-transform: uppercase;
 }
 
+/* 🍞 TOAST NOTIFICATIONS ELEGANTES */
+        .custom-toast {
+            background: rgba(9, 12, 20, 0.85) !important;
+            backdrop-filter: blur(8px);
+            border-left: 4px solid #fff;
+            color: #ffffff;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 280px;
+            max-width: 380px;
+            pointer-events: auto;
+            transform: translateX(120%);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
+            opacity: 0;
+        }
+        .custom-toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        .custom-toast.toast-success { border-left-color: var(--ensancha-cyan); }
+        .custom-toast.toast-warning { border-left-color: var(--ensancha-yellow); }
+        .custom-toast.toast-error { border-left-color: #ff4444; }
+        .custom-toast i { font-size: 14px; }
 
     </style>
 </head>
 <body>
+    <div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none;"></div>
 
 <div class="main-header" style="display: block; text-align: center; border-bottom: 1px solid #141923; padding-bottom: 15px; margin-top: 5px;">
         <img src="https://firebasestorage.googleapis.com/v0/b/ensancha-gestion.firebasestorage.app/o/IMG_0665.JPG?alt=media" alt="Ensancha Doble Porción" style="width: 100%; max-width: 600px; height: auto; display: block; margin: 0 auto; border-radius: 4px;">
@@ -1096,13 +1127,15 @@
                 inputList: inputListData
             };
 
-            try {
+           try {
                 await setDoc(doc(db, "cronograma", "eventos"), cronogramaGlobal);
                 let labelExito = currentDay.toUpperCase().replace('_', ' ');
-                alert(`☁️ ¡Configuración unificada para ${labelExito} guardada con éxito!`);
+                // 🍞 Toast elegante de éxito
+                window.mostrarToast(`☁️ ¡Configuración unificada para ${labelExito} guardada con éxito!`, 'success');
             } catch (err) {
                 console.error(err);
-                alert("Error al guardar la configuración.");
+                // 🍞 Toast elegante de error
+                window.mostrarToast("❌ Error al guardar la configuración en Firebase.", 'error');
             }
         }
 
@@ -1153,22 +1186,24 @@
             });
 
             if (estructuraCopiada.length === 0) {
-                alert("⚠️ No hay canales en la tabla para copiar.");
+                // 🍞 Toast elegante de advertencia
+                window.mostrarToast("⚠️ No hay canales en la tabla para copiar.", 'warning');
                 return;
             }
 
             // Guardamos el objeto completo en el portapapeles del navegador
             localStorage.setItem('inputListClipboard', JSON.stringify(estructuraCopiada));
-            alert(`📋 ¡Input List copiado con éxito! (${estructuraCopiada.length} canales en memoria). Ahora cambia de día y presiona "Pegar".`);
+            
+            // 🍞 Toast elegante de éxito
+            window.mostrarToast(`📋 ¡Input List copiado con éxito! (${estructuraCopiada.length} canales en memoria). Ahora cambia de día y presiona 'Pegar'.`, 'success');
         }
 
-        // 📋 FUNCIÓN PARA PEGAR CON RECONOCIMIENTO INTELIGENTE DE MÚSICOS
-        // 📋 FUNCIÓN PARA PEGAR CON RECONOCIMIENTO INTELIGENTE DE MÚSICOS
+      
         window.pegarInputListPro = function() {
-            const rawData = localStorage.getItem('inputListClipboard');
+           const rawData = localStorage.getItem('inputListClipboard');
             if (!rawData) {
-                // 🛡️ CORREGIDO: Usamos comillas simples dentro de las comillas dobles
-                alert("❌ No hay ningún Input List copiado en la memoria. Primero ve al día de origen y presiona 'Copiar'.");
+                // 🍞 Toast elegante de error en lugar del alert molesto
+                window.mostrarToast("❌ No hay ningún Input List copiado en la memoria. Primero ve al día de origen y presiona 'Copiar'.", 'error');
                 return;
             }
 
@@ -1214,13 +1249,42 @@
                 appendChannelRow(index + 1, optionsMusicos, dataFila);
             });
 
-            // Forzamos actualización visual del Stage plot por si cambiaron músicos asignados
+           // Forzamos actualización visual del Stage plot por si cambiaron músicos asignados
             sincronizarEtiquetasStageplot();
             
-            alert(`⚡ ¡Configuración pegada e integrada con éxito! Se estructuraron ${datosCopiados.length} canales. Recuerda revisar la asignación de nombres y presionar "Guardar Configuración del Día" para subirlo a Firebase.`);
+            // 🍞 Toast elegante de éxito final para el pegado inteligente
+            window.mostrarToast(`⚡ ¡Configuración pegada! Se estructuraron ${datosCopiados.length} canales.`, 'success');
         }
 
 
+        // 🍞 SISTEMA CENTRALIZADO DE TOASTS ELEGANTES
+        window.mostrarToast = function(mensaje, tipo = 'success') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            toast.className = `custom-toast toast-${tipo}`;
+            
+            // Elegir icono según el tipo
+            let icono = '<i class="fa-solid fa-circle-check" style="color: var(--ensancha-cyan);"></i>';
+            if (tipo === 'warning') icono = '<i class="fa-solid fa-triangle-exclamation" style="color: var(--ensancha-yellow);"></i>';
+            if (tipo === 'error') icono = '<i class="fa-solid fa-circle-xmark" style="color: #ff4444;"></i>';
+
+            toast.innerHTML = `${icono} <span>${mensaje}</span>`;
+            container.appendChild(toast);
+
+            // Trigger de animación de entrada
+            setTimeout(() => toast.classList.add('show'), 50);
+
+            // Remover de pantalla automáticamente a los 4 segundos
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
     </script>
+
+    
 </body>
 </html>
