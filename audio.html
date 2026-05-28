@@ -1163,10 +1163,12 @@
         }
 
         // 📋 FUNCIÓN PARA PEGAR CON RECONOCIMIENTO INTELIGENTE DE MÚSICOS
+        // 📋 FUNCIÓN PARA PEGAR CON RECONOCIMIENTO INTELIGENTE DE MÚSICOS
         window.pegarInputListPro = function() {
             const rawData = localStorage.getItem('inputListClipboard');
             if (!rawData) {
-                alert("❌ No hay ningún Input List copiado en la memoria. Primero ve al día de origen y presiona "Copiar".");
+                // 🛡️ CORREGIDO: Usamos comillas simples dentro de las comillas dobles
+                alert("❌ No hay ningún Input List copiado en la memoria. Primero ve al día de origen y presiona 'Copiar'.");
                 return;
             }
 
@@ -1203,7 +1205,7 @@
                 }
 
                 const dataFila = {
-                    musico: musicoDestino, // Aquí va el músico asignado inteligentemente o vacío si no coincide
+                    musico: musicoDestino,
                     instrumento: canalCopiado.instrumento,
                     conexion: canalCopiado.conexion,
                     notas: canalCopiado.notas
@@ -1218,7 +1220,7 @@
             alert(`⚡ ¡Configuración pegada e integrada con éxito! Se estructuraron ${datosCopiados.length} canales. Recuerda revisar la asignación de nombres y presionar "Guardar Configuración del Día" para subirlo a Firebase.`);
         }
 
-        
+
     </script>
 </body>
 </html>
