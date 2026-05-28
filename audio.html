@@ -365,8 +365,20 @@
             
             <div class="stage-canvas" id="escenarioStageplot"></div>
 
-            <div class="panel" style="margin-bottom: 40px;">
-                <div class="panel-title" style="color: var(--ensancha-cyan); margin-bottom: 5px;">🎚️ Input List del Altar</div>
+           <div class="panel" style="margin-bottom: 40px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <div class="panel-title" style="color: var(--ensancha-cyan); margin: 0; border: none; padding-bottom: 0;">🎚️ Input List del Altar</div>
+                    
+                    <div style="display: flex; gap: 8px;">
+                        <button type="button" class="btn" style="background: rgba(255,255,255,0.05); color: #fff; padding: 6px 12px; font-size: 10px; border: 1px solid var(--border-window);" onclick="copiarInputListPro()">
+                            <i class="fa-solid fa-copy" style="color: var(--ensancha-yellow); margin-right: 4px;"></i> Copiar Input List
+                        </button>
+                        <button type="button" class="btn" style="background: rgba(255,255,255,0.05); color: #fff; padding: 6px 12px; font-size: 10px; border: 1px solid var(--border-window);" onclick="pegarInputListPro()">
+                            <i class="fa-solid fa-paste" style="color: var(--ensancha-cyan); margin-right: 4px;"></i> Pegar Configuración
+                        </button>
+                    </div>
+                </div>
+
                 <div class="table-wrapper">
                     <table class="input-table">
                         <thead>
@@ -847,7 +859,10 @@
         window.addExtraChannelRow = function() {
             let optionsMusicos = `<option value="">— Canal Libre —</option>`;
             musicosDelDiaActual.forEach(m => { optionsMusicos += `<option value="${m.nombre}">${m.nombre} (${m.rol})</option>`; });
-            appendChannelRow(currentChannelCount + 1, optionsMusicos, { musico: "", instrumento: "", conexion: "Línea Directa (DI)", notas: "" });
+            optionsMusicos += `<option value="Talkback">Talkback (MC)</option>`;
+            optionsMusicos += `<option value="Secuencias">Secuencias (L/R)</option>`;
+            
+            appendChannelRow(currentChannelCount + 1, optionsMusicos, { musico: "", instrumento: "", conexion: "", notas: "" });
         }
 
         const canvasEscenario = document.getElementById('escenarioStageplot');
@@ -1112,6 +1127,98 @@
             const tamanoGuardado = localStorage.getItem('stageplotZoom') || 70;
             ajustarTamanoEnVivo(tamanoGuardado);
         });
+
+
+        // 📋 FUNCIÓN PARA COPIAR EL INPUT LIST ACTUAL
+        window.copiarInputListPro = function() {
+            const estructuraCopiada = [];
+            
+            document.querySelectorAll('.channel-row-item').forEach(row => {
+                const selectElement = row.querySelector('.sel-musico-ch');
+                const selectedOption = selectElement.options[selectElement.selectedIndex];
+                
+                // Extraemos el rol que está entre paréntesis en el option select
+                let rolDetectado = "";
+                if (selectedOption && selectedOption.text.includes('(')) {
+                    rolDetectado = selectedOption.text.split('(')[1].replace(')', '').trim();
+                }
+
+                estructuraCopiada.push({
+                    musicoViejo: selectElement.value,
+                    rolViejo: rolDetectado, // Guardamos el rol para rastrearlo inteligentemente al pegar
+                    instrumento: row.querySelector('.inp-inst-ch').value,
+                    conexion: row.querySelector('.inp-con-ch').value,
+                    notas: row.querySelector('.inp-notas-ch').value
+                });
+            });
+
+            if (estructuraCopiada.length === 0) {
+                alert("⚠️ No hay canales en la tabla para copiar.");
+                return;
+            }
+
+            // Guardamos el objeto completo en el portapapeles del navegador
+            localStorage.setItem('inputListClipboard', JSON.stringify(estructuraCopiada));
+            alert(`📋 ¡Input List copiado con éxito! (${estructuraCopiada.length} canales en memoria). Ahora cambia de día y presiona "Pegar".`);
+        }
+
+        // 📋 FUNCIÓN PARA PEGAR CON RECONOCIMIENTO INTELIGENTE DE MÚSICOS
+        window.pegarInputListPro = function() {
+            const rawData = localStorage.getItem('inputListClipboard');
+            if (!rawData) {
+                alert("❌ No hay ningún Input List copiado en la memoria. Primero ve al día de origen y presiona "Copiar".");
+                return;
+            }
+
+            const datosCopiados = JSON.parse(rawData);
+            
+            // Re-generamos el HTML de opciones de músicos del día de destino
+            let optionsMusicos = `<option value="">— Canal Libre —</option>`;
+            musicosDelDiaActual.forEach(m => {
+                optionsMusicos += `<option value="${m.nombre}">${m.nombre} (${m.rol})</option>`;
+            });
+            optionsMusicos += `<option value="Talkback">Talkback (MC)</option>`;
+            optionsMusicos += `<option value="Secuencias">Secuencias (L/R)</option>`;
+
+            // Limpiamos la tabla visual actual para reescribirla desde cero
+            const tbody = document.getElementById('tbodyInputList');
+            tbody.innerHTML = '';
+            currentChannelCount = 0;
+
+            // Procesamos y emparejamos cada canal copiado
+            datosCopiados.forEach((canalCopiado, index) => {
+                let musicoDestino = "";
+
+                // Regla especial para líneas estáticas
+                if (canalCopiado.musicoViejo === "Talkback" || canalCopiado.musicoViejo === "Secuencias") {
+                    musicoDestino = canalCopiado.musicoViejo;
+                } 
+                // Emparejamiento inteligente por rol
+                else if (canalCopiado.rolViejo !== "") {
+                    // Buscamos si en la alineación de HOY existe un músico con ese mismo rol exacto
+                    const matchPro = musicosDelDiaActual.find(m => m.rol.toLowerCase().trim() === canalCopiado.rolViejo.toLowerCase().trim());
+                    if (matchPro) {
+                        musicoDestino = matchPro.nombre;
+                    }
+                }
+
+                const dataFila = {
+                    musico: musicoDestino, // Aquí va el músico asignado inteligentemente o vacío si no coincide
+                    instrumento: canalCopiado.instrumento,
+                    conexion: canalCopiado.conexion,
+                    notas: canalCopiado.notas
+                };
+
+                appendChannelRow(index + 1, optionsMusicos, dataFila);
+            });
+
+            // Forzamos actualización visual del Stage plot por si cambiaron músicos asignados
+            sincronizarEtiquetasStageplot();
+            
+            alert(`⚡ ¡Configuración pegada e integrada con éxito! Se estructuraron ${datosCopiados.length} canales. Recuerda revisar la asignación de nombres y presionar "Guardar Configuración del Día" para subirlo a Firebase.`);
+        }
+
+        
     </script>
 </body>
 </html>
