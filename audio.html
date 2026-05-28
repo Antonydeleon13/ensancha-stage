@@ -881,7 +881,7 @@
         else if (/male|malee/i.test(n)) {
             return '<img src="male.png" alt="Male Vox" style="width: 100%; height: auto; object-fit: contain;">';
         }
-        // 🎤 CASO ESPECIAL 16: Gabriel ⬅️ ¡NUEVO ELEMENTO AGREGADO!
+        // 🎤 CASO ESPECIAL 16: Gabriel
         else if (n.includes("gabriel")) {
             return '<img src="gabriel.png" alt="Gabriel Vox" style="width: 100%; height: auto; object-fit: contain;">';
         }
@@ -946,6 +946,16 @@
         }
         // Icono general para los demás percusionistas
         return '<i class="fa-solid fa-drum-steelpan"></i>';
+    }
+
+    // 🎷 SECCIÓN DE VIENTOS: Saxo / Saxofón ⬅️ ¡NUEVA REGLA AGREGADA!
+    if (/saxo|saxof[oó]n|sax/i.test(r)) {
+        // 🎷 CASO ESPECIAL: Si el saxofonista se llama Sebas
+        if (n.includes("sebas")) {
+            return '<img src="sebassaxo.png" alt="Sebas Sax" style="width: 100%; height: auto; object-fit: contain;">';
+        }
+        // Icono por defecto de FontAwesome para saxofones genéricos
+        return '<i class="fa-solid fa-saxophones"></i>';
     }
     
     // 🎧 Directores Musicales, Directores Técnicos o Talkbacks
