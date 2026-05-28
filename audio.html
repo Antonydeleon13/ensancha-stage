@@ -795,6 +795,10 @@
                 optionsMusicos += `<option value="${m.nombre}">${m.nombre} (${m.rol})</option>`;
             });
 
+            // 🎤 Agregar líneas técnicas extras al listado de la consola
+            optionsMusicos += `<option value="Talkback">Talkback (MC)</option>`;
+            optionsMusicos += `<option value="Secuencias">Secuencias (L/R)</option>`;
+
             const canalesAGenerar = Math.max(16, inputListGuardado.length);
             for (let i = 0; i < canalesAGenerar; i++) {
                 const backupData = inputListGuardado[i] || { musico: "", instrumento: "", conexion: "", notas: "" };
