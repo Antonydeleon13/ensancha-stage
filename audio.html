@@ -813,13 +813,7 @@
                 <td><select class="sel-musico-ch">${optionsHtml}</select></td>
                 <td><input type="text" class="inp-inst-ch" placeholder="Ej: Voz Lead, Bajo, Teclado L" value="${data.instrumento}"></td>
                 <td>
-                    <select class="sel-con-ch">
-                        <option value="Línea Directa (DI)" ${data.conexion === 'Línea Directa (DI)' ? 'selected' : ''}>Línea Directa (DI)</option>
-                        <option value="Micrófono Vocal Inalámbrico" ${data.conexion === 'Micrófono Vocal Inalámbrico' ? 'selected' : ''}>Micrófono Vocal Inalámbrico</option>
-                        <option value="Micrófono Shure SM57" ${data.conexion === 'Micrófono Shure SM57' ? 'selected' : ''}>Micrófono Shure SM57</option>
-                        <option value="Caja Directa Stereo (DI)" ${data.conexion === 'Caja Directa Stereo (DI)' ? 'selected' : ''}>Caja Directa Stereo (DI)</option>
-                        <option value="Conexión XLR Directa" ${data.conexion === 'Conexión XLR Directa' ? 'selected' : ''}>Conexión XLR Directa</option>
-                    </select>
+                    <input type="text" class="inp-con-ch" placeholder="Ej: Línea Directa (DI), XLR, SM57" value="${data.conexion || ''}">
                 </td>
                 <td><input type="text" class="inp-notas-ch" placeholder="Monitoreo, EQ, notas..." value="${data.notes || data.notas || ''}"></td>
             `;
@@ -1011,7 +1005,7 @@
                 const ch = row.querySelector('.ch-number').innerText;
                 const musicoAsignado = row.querySelector('.sel-musico-ch').value;
                 const instrumento = row.querySelector('.inp-inst-ch').value.trim();
-                const conexion = row.querySelector('.sel-con-ch').value;
+                const conexion = row.querySelector('.inp-con-ch').value;
 
                 if (musicoAsignado === nombre) {
                     canalesEncontrados++;
@@ -1058,7 +1052,7 @@
                 inputListData.push({
                     musico: row.querySelector('.sel-musico-ch').value,
                     instrumento: row.querySelector('.inp-inst-ch').value,
-                    conexion: row.querySelector('.sel-con-ch').value,
+                    conexion: row.querySelector('.inp-con-ch').value, // ⬅️ Cambiado '.sel-con-ch' por '.inp-con-ch'
                     notes: row.querySelector('.inp-notas-ch').value
                 });
             });
