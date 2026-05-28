@@ -797,7 +797,7 @@
 
             const canalesAGenerar = Math.max(16, inputListGuardado.length);
             for (let i = 0; i < canalesAGenerar; i++) {
-                const backupData = inputListGuardado[i] || { musico: "", instrumento: "", conexion: "Línea Directa (DI)", notas: "" };
+                const backupData = inputListGuardado[i] || { musico: "", instrumento: "", conexion: "", notas: "" };
                 appendChannelRow(i + 1, optionsMusicos, backupData);
             }
 
