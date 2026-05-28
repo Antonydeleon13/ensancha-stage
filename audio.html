@@ -881,15 +881,19 @@
         else if (/male|malee/i.test(n)) {
             return '<img src="male.png" alt="Male Vox" style="width: 100%; height: auto; object-fit: contain;">';
         }
-        // 🎤 CASO ESPECIAL 16: Chino
+        // 🎤 CASO ESPECIAL 16: Gabriel ⬅️ ¡NUEVO ELEMENTO AGREGADO!
+        else if (n.includes("gabriel")) {
+            return '<img src="gabriel.png" alt="Gabriel Vox" style="width: 100%; height: auto; object-fit: contain;">';
+        }
+        // 🎤 CASO ESPECIAL 17: Chino
         else if (n.includes("chino")) {
             return '<img src="chino.png" alt="Chino Vox" style="width: 100%; height: auto; object-fit: contain;">';
         }
-        // 🎤 CASO ESPECIAL 17: Cami
+        // 🎤 CASO ESPECIAL 18: Cami
         else if (n.includes("cami")) {
             return '<img src="cami.png" alt="Cami Vox" style="width: 100%; height: auto; object-fit: contain;">';
         }
-        // 🎤 CASO ESPECIAL 18: Chepe
+        // 🎤 CASO ESPECIAL 19: Chepe
         else if (n.includes("chepe")) {
             return '<img src="chepe.png" alt="Chepe Vox" style="width: 100%; height: auto; object-fit: contain;">';
         }
